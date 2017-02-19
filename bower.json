@@ -1,0 +1,17 @@
+{
+  "name": "backed",
+  "description": "Small web framework for quick app development",
+  "main": "backed.html",
+  "authors": [
+    "Glenn Vandeuren <vandeurenglenn@gmail.com>"
+  ],
+  "license": "CC-BY-NC-ND-4.0",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

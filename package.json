@@ -1,0 +1,29 @@
+{
+  "name": "backed",
+  "version": "0.0.0",
+  "description": "Small web framework for quick app development",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/basicelements/backed.git"
+  },
+  "author": "Glenn Vadeuren <vandeurenglenn@gmail.com>",
+  "license": "CC-BY-NC-ND-4.0",
+  "bugs": {
+    "url": "https://github.com/basicelements/backed/issues"
+  },
+  "homepage": "https://github.com/basicelements/backed#readme",
+  "devDependencies": {
+    "browser-sync": "^2.18.8",
+    "del": "^2.2.2",
+    "eslint": "^3.15.0",
+    "eslint-config-google": "^0.7.1",
+    "gulp": "gulpjs/gulp#4.0",
+    "rollup": "^0.41.4",
+    "rollup-plugin-babel": "^2.7.1",
+    "rollup-plugin-json": "^2.1.0"
+  }
+}
