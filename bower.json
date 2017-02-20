@@ -1,5 +1,6 @@
 {
   "name": "backed",
+  "version": "0.0.0",
   "description": "Small web framework for quick app development",
   "main": "backed.html",
   "authors": [
