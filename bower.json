@@ -1,7 +1,7 @@
 {
   "name": "backed",
-  "version": "0.0.0",
-  "description": "Small web framework for quick app development",
+  "version": "0.0.0-alpha.1",
+  "description": "Small web framework for quick app & component development",
   "main": "backed.html",
   "authors": [
     "Glenn Vandeuren <vandeurenglenn@gmail.com>"

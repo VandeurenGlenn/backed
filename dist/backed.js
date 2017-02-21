@@ -1,3 +1,5 @@
+// import Bind from './bind.js';
+
 const handleProperties = (target, properties) => {
   if (properties) {
     for (let property of Object.keys(properties)) {
@@ -82,10 +84,24 @@ var Utils = {
   setupObserver: setupObserver.bind(undefined)
 };
 
+/**
+ * @mixin backed
+ * @param {string} type Name of the event
+ * @param {HTMLElement} target Name of the event
+ * @param {string|boolean|number|object|array} detail
+ */
 var fireEvent = (type=String, detail=null, target=document) => {
   target.dispatchEvent(new CustomEvent(type, {detail: detail}));
 };
 
+/**
+ * @mixin Backed
+ *
+ * some-prop -> someProp
+ *
+ * @arg {string} string The content to convert
+ * @return {string} string
+ */
 var toJsProp = string => {
   let parts = string.split('-');
   if (parts.length > 1) {
@@ -93,6 +109,20 @@ var toJsProp = string => {
     string = parts[0] + upper + parts[1].slice(1).toLowerCase();
   }
   return string;
+};
+
+const loadScript = src => {
+  return new Promise((resolve, reject) => {
+    let script = document.createElement('script');
+    script.src = src;
+    script.onload = result => {
+      resolve(result);
+    };
+    script.onerror = error => {
+      reject(error);
+    };
+    document.body.appendChild(script);
+  });
 };
 
 var Pubsub = class {
@@ -155,6 +185,7 @@ var Backed = _class => {
       super();
       this.fireEvent = fireEvent.bind(this);
       this.toJsProp = toJsProp.bind(this);
+      this.loadScript = loadScript.bind(this);
 
       Utils.handleProperties(this, _class.properties);
       Utils.handleObservers(this, _class.observers);
