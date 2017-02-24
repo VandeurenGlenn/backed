@@ -7,7 +7,7 @@ import PubSubLoader from './internals/pub-sub-loader.js';
 
 const isNode = () => {
   try {
-    return this===global;
+    return global;
   }catch(e){
     return false;
   }
