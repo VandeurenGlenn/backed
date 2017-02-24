@@ -167,11 +167,23 @@ var Pubsub = class {
   }
 };
 
-var PubSubLoader = () => {
-  window.PubSub = window.PubSub || new Pubsub();
+var PubSubLoader = isNode => {
+  if (isNode) {
+    global.PubSub =  global.PubSub || new Pubsub();
+  } else {
+    window.PubSub = window.PubSub || new Pubsub();
+  }
 };
 
-PubSubLoader();
+const isNode = () => {
+  try {
+    return undefined===global;
+  }catch(e){
+    return false;
+  }
+};
+
+PubSubLoader(isNode());
 
 /**
  *
@@ -181,14 +193,6 @@ PubSubLoader();
 var backed = _class => {
   const upperToHyphen = string => {
     return string.replace(/([A-Z])/g, "-$1").toLowerCase().replace('-', '');
-  };
-
-  const isNode= () => {
-    try {
-      return undefined===global;
-    }catch(e){
-      return false;
-    }
   };
 
   const construct = (name, _class) => {
