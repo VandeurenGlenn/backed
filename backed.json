@@ -1,7 +1,7 @@
 {
   "src": "src/backed.js",
   "dest": "dist/backed.js",
-  "format": "iife",
+  "format": ["iife", "es"],
   "moduleName": "Backed",
   "babel": {
     "babelrc": false,
