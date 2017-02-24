@@ -1,5 +1,3 @@
-// import Bind from './bind.js';
-
 const handleProperties = (target, properties) => {
   if (properties) {
     for (let property of Object.keys(properties)) {
@@ -49,12 +47,16 @@ const _needsObserverSetup = (obj, property) => {
 const setupObserver = (obj, property, strict=false, fn) => {
   Object.defineProperty(obj, property, {
     set(value) {
+      this[`_${property}`] = value;
       let data = {
         property: property,
         value: value
       };
       this[fn](data);
       PubSub.publish(fn, data);
+    },
+    get() {
+      return this[`_${property}`];
     },
     configurable: strict ? false : true
   });
@@ -84,24 +86,10 @@ var Utils = {
   setupObserver: setupObserver.bind(undefined)
 };
 
-/**
- * @mixin backed
- * @param {string} type Name of the event
- * @param {HTMLElement} target Name of the event
- * @param {string|boolean|number|object|array} detail
- */
 var fireEvent = (type=String, detail=null, target=document) => {
   target.dispatchEvent(new CustomEvent(type, {detail: detail}));
 };
 
-/**
- * @mixin Backed
- *
- * some-prop -> someProp
- *
- * @arg {string} string The content to convert
- * @return {string} string
- */
 var toJsProp = string => {
   let parts = string.split('-');
   if (parts.length > 1) {
