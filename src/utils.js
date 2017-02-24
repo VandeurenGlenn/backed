@@ -74,7 +74,7 @@ const handleObservers = (obj, observers) => {
     let parts = observe.split(/\(|\)/g);
     let fn = parts[0];
     parts = parts.slice(1);
-    for (property of parts) {
+    for (let property of parts) {
       if (property.length) {
         handlePropertyObserver(obj, property, false, fn);
       }
