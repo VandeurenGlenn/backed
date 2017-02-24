@@ -4,7 +4,16 @@ import fireEvent from './internals/fire-event.js';
 import toJsProp from './internals/to-js-prop.js';
 import loadScript from './internals/load-script.js';
 import PubSubLoader from './internals/pub-sub-loader.js';
-PubSubLoader();
+
+const isNode = () => {
+  try {
+    return this===global;
+  }catch(e){
+    return false;
+  }
+};
+
+PubSubLoader(isNode());
 
 /**
  *
@@ -14,14 +23,6 @@ PubSubLoader();
 export default _class => {
   const upperToHyphen = string => {
     return string.replace(/([A-Z])/g, "-$1").toLowerCase().replace('-', '');
-  };
-
-  const isNode= () => {
-    try {
-      return this===global;
-    }catch(e){
-      return false;
-    }
   };
 
   const construct = (name, _class) => {
