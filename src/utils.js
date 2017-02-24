@@ -50,12 +50,16 @@ const _needsObserverSetup = (obj, property) => {
 const setupObserver = (obj, property, strict=false, fn) => {
   Object.defineProperty(obj, property, {
     set(value) {
+      this[`_${property}`] = value;
       let data = {
         property: property,
         value: value
       };
       this[fn](data);
       PubSub.publish(fn, data);
+    },
+    get() {
+      return this[`_${property}`];
     },
     configurable: strict ? false : true
   });
