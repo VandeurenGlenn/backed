@@ -9,18 +9,35 @@ PubSubLoader();
 /**
  *
  * @module backed
- * @arg {class} _class
+ * @param {class} _class
  */
 export default _class => {
   const upperToHyphen = string => {
     return string.replace(/([A-Z])/g, "-$1").toLowerCase().replace('-', '');
+  };
+
+  const isNode= () => {
+    try {
+      return this===global;
+    }catch(e){
+      return false;
+    }
+  };
+
+  const construct = (name, _class) => {
+    if (isNode()) {
+      return _class;
+    } else {
+      customElements.define(name, _class);
+    }
   }
+
 
   // get the tagName or try to make one with class.name
   let name = _class.is || upperToHyphen(_class.name);
   // Setup properties & mixins
   // define/register custom-element
-  customElements.define(name, class extends _class {
+  return construct(name, class extends _class {
     constructor() {
       super();
       this.fireEvent = fireEvent.bind(this);
