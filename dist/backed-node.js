@@ -1,3 +1,5 @@
+'use strict';
+
 // import Bind from './bind.js';
 
 const handleProperties = (target, properties) => {
@@ -218,5 +220,5 @@ var backed = _class => {
   });
 };
 
-export default backed;
-//# sourceMappingURL=backed-es.js.map
+module.exports = backed;
+//# sourceMappingURL=backed-node.js.map

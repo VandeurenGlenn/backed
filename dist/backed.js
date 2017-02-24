@@ -177,7 +177,7 @@ var PubSubLoader = isNode => {
 
 const isNode = () => {
   try {
-    return undefined===global;
+    return global;
   }catch(e){
     return false;
   }
