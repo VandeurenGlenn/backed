@@ -1,3 +1,8 @@
+var Backed = (function () {
+'use strict';
+
+// import Bind from './bind.js';
+
 const handleProperties = (target, properties) => {
   if (properties) {
     for (let property of Object.keys(properties)) {
@@ -71,7 +76,7 @@ const handleObservers = (obj, observers) => {
     let parts = observe.split(/\(|\)/g);
     let fn = parts[0];
     parts = parts.slice(1);
-    for (property of parts) {
+    for (let property of parts) {
       if (property.length) {
         handlePropertyObserver(obj, property, false, fn);
       }
@@ -86,10 +91,24 @@ var Utils = {
   setupObserver: setupObserver.bind(undefined)
 };
 
+/**
+ * @mixin backed
+ * @param {string} type Name of the event
+ * @param {HTMLElement} target Name of the event
+ * @param {string|boolean|number|object|array} detail
+ */
 var fireEvent = (type=String, detail=null, target=document) => {
   target.dispatchEvent(new CustomEvent(type, {detail: detail}));
 };
 
+/**
+ * @mixin Backed
+ *
+ * some-prop -> someProp
+ *
+ * @arg {string} string The content to convert
+ * @return {string} string
+ */
 var toJsProp = string => {
   let parts = string.split('-');
   if (parts.length > 1) {
@@ -157,18 +176,35 @@ PubSubLoader();
 /**
  *
  * @module backed
- * @arg {class} _class
+ * @param {class} _class
  */
-var Backed = _class => {
+var backed = _class => {
   const upperToHyphen = string => {
     return string.replace(/([A-Z])/g, "-$1").toLowerCase().replace('-', '');
   };
+
+  const isNode= () => {
+    try {
+      return undefined===global;
+    }catch(e){
+      return false;
+    }
+  };
+
+  const construct = (name, _class) => {
+    if (isNode()) {
+      return _class;
+    } else {
+      customElements.define(name, _class);
+    }
+  };
+
 
   // get the tagName or try to make one with class.name
   let name = _class.is || upperToHyphen(_class.name);
   // Setup properties & mixins
   // define/register custom-element
-  customElements.define(name, class extends _class {
+  return construct(name, class extends _class {
     constructor() {
       super();
       this.fireEvent = fireEvent.bind(this);
@@ -181,5 +217,7 @@ var Backed = _class => {
   });
 };
 
-window.Backed = window.Backed || new Backed();
+return backed;
+
+}());
 //# sourceMappingURL=backed.js.map
