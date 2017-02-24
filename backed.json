@@ -1,0 +1,20 @@
+{
+  "src": "src/backed.js",
+  "dest": "dist/backed.js",
+  "format": "iife",
+  "moduleName": "Backed",
+  "babel": {
+    "babelrc": false,
+    "presets": [
+      [
+        "es2015",
+        {
+          "modules": false
+        }
+      ]
+    ],
+    "plugins": [
+      "external-helpers"
+    ]
+  }
+}

@@ -17,13 +17,8 @@
   },
   "homepage": "https://github.com/basicelements/backed#readme",
   "devDependencies": {
-    "browser-sync": "^2.18.8",
-    "del": "^2.2.2",
+    "backed-cli": "0.0.0-alpha.6",
     "eslint": "^3.15.0",
-    "eslint-config-google": "^0.7.1",
-    "gulp": "gulpjs/gulp#4.0",
-    "rollup": "^0.41.4",
-    "rollup-plugin-babel": "^2.7.1",
-    "rollup-plugin-json": "^2.1.0"
+    "eslint-config-google": "^0.7.1"
   }
 }
