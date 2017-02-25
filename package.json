@@ -2,7 +2,7 @@
   "name": "backed",
   "version": "0.0.0-alpha.5",
   "description": "Small web framework for quick app & component development",
-  "main": "dist/backed.js",
+  "main": "dist/backed-node.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
