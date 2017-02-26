@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/basicelements/backed.git"
+    "url": "git+https://github.com/vandeurenglenn/backed.git"
   },
   "author": "Glenn Vadeuren <vandeurenglenn@gmail.com>",
   "license": "CC-BY-NC-ND-4.0",
   "bugs": {
-    "url": "https://github.com/basicelements/backed/issues"
+    "url": "https://github.com/vandeurenglenn/backed/issues"
   },
-  "homepage": "https://github.com/basicelements/backed#readme",
+  "homepage": "https://github.com/vandeurenglenn/backed#readme",
   "devDependencies": {
     "backed-cli": "0.0.0-alpha.6",
     "eslint": "^3.15.0",
