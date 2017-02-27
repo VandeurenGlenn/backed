@@ -5,15 +5,15 @@ import toJsProp from './internals/to-js-prop.js';
 import loadScript from './internals/load-script.js';
 import PubSubLoader from './internals/pub-sub-loader.js';
 
-const isNode = () => {
+const isWindow = () => {
   try {
-    return global;
-  }catch(e){
+    return window;
+  } catch(e) {
     return false;
   }
 };
 
-PubSubLoader(isNode());
+PubSubLoader(isWindow());
 
 /**
  *
@@ -26,10 +26,10 @@ export default _class => {
   };
 
   const construct = (name, _class) => {
-    if (isNode()) {
-      return _class;
-    } else {
+    if (isWindow()) {
       customElements.define(name, _class);
+    } else {
+      return _class;
     }
   }
 
