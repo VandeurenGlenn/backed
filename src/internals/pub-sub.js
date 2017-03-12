@@ -22,13 +22,17 @@ export default class {
 
   /**
    * @param {String} event
-   * @param {String|Number|Boolean|Object|Array} value
+   * @param {String|Number|Boolean|Object|Array} change
    */
-  publish(event, value) {
+  publish(event, change) {
     for (let i = 0; i < this.handlers.length; i++) {
       if (this.handlers[i].event === event) {
-        this.handlers[i].handler(event, value, this.handlers[i].oldValue);
-        this.handlers[i].oldValue = value;
+        let oldValue = this.handlers[i].oldValue || {};
+        // dirty checking value, ensures that we don't create a loop
+        if (oldValue.value !== change.value) {
+          this.handlers[i].handler(change, this.handlers[i].oldValue);
+          this.handlers[i].oldValue = change;
+        }
       }
     }
   }
