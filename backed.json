@@ -1,20 +1,8 @@
 {
-  "src": "src/backed.js",
-  "dest": "dist/backed.js",
-  "format": ["iife", "es", "cjs"],
-  "moduleName": "Backed",
-  "babel": {
-    "babelrc": false,
-    "presets": [
-      [
-        "es2015",
-        {
-          "modules": false
-        }
-      ]
-    ],
-    "plugins": [
-      "external-helpers"
-    ]
-  }
+  "bundles": [{
+    "src": "src/backed.js",
+    "dest": "dist/backed.js",
+    "moduleName": "Backed"
+  }],
+  "format": ["iife", "cjs", "es"]
 }
