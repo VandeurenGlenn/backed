@@ -1,22 +1,31 @@
 'use strict';
 
-// import Bind from './bind.js';
-
 const handleProperties = (target, properties) => {
   if (properties) {
     for (let property of Object.keys(properties)) {
       const observer = properties[property].observer;
       const strict = properties[property].strict;
-      handlePropertyObserver(target, property, strict, observer);
+      const isGlobal = properties[property].global;
+      handlePropertyObserver(target, property, observer, {
+        strict: strict || false,
+        global: isGlobal || false
+      });
       // Bind(superclass, superclass.properties)
     }
   }
 };
 
-const handlePropertyObserver = (obj, property, strict, observer) => {
+const handlePropertyObserver = (obj, property, observer, opts={
+  strict: false, global:false
+}) => {
+
   if (observer && _needsObserverSetup(obj, property)) {
     obj.observedProperties.push(property);
-    setupObserver(obj, property, strict, observer);
+
+    if (opts.global) {
+      PubSub.subscribe(`global.${property}`, obj[observer]);
+    }
+    setupObserver(obj, property, observer, opts);
   }
 };
 
@@ -34,6 +43,22 @@ const _needsObserverSetup = (obj, property) => {
   }
 };
 
+const forObservers = (target, observers, isGlobal=false) => {
+  for (let observe of observers) {
+    let parts = observe.split(/\(|\)/g);
+    let fn = parts[0];
+    parts = parts.slice(1);
+    for (let property of parts) {
+      if (property.length) {
+        handlePropertyObserver(target, property, fn, {
+          strict: false,
+          global: isGlobal
+        });
+      }
+    }
+  }
+};
+
 /**
  * Runs a method on target whenever given property changes
  *
@@ -48,7 +73,9 @@ const _needsObserverSetup = (obj, property) => {
  * @arg {boolean} strict
  * @arg {method} fn The method to run on change
  */
-const setupObserver = (obj, property, strict=false, fn) => {
+const setupObserver = (obj, property, fn, opts={
+  strict: false, global: false
+}) => {
   Object.defineProperty(obj, property, {
     set(value) {
       this[`_${property}`] = value;
@@ -56,58 +83,39 @@ const setupObserver = (obj, property, strict=false, fn) => {
         property: property,
         value: value
       };
-      this[fn](data);
-      PubSub.publish(fn, data);
+      if (opts.global) {
+        data.instance = this;
+        PubSub.publish(`global.${property}`, data);
+      } else {
+        this[fn](data);
+      }
     },
     get() {
       return this[`_${property}`];
     },
-    configurable: strict ? false : true
+    configurable: opts.strict
   });
 };
 
 
-const handleObservers = (obj, observers) => {
-  if (!observers) {
+const handleObservers = (target, observers=[], globalObservers=[]) => {
+  if (!observers && !globalObservers) {
     return;
   }
-  for (let observe of observers) {
-    let parts = observe.split(/\(|\)/g);
-    let fn = parts[0];
-    parts = parts.slice(1);
-    for (let property of parts) {
-      if (property.length) {
-        handlePropertyObserver(obj, property, false, fn);
-      }
-    }
-  }
+  forObservers(target, observers);
 };
 
-var Utils = {
+var base = {
   handleProperties: handleProperties.bind(undefined),
   handlePropertyObserver: handlePropertyObserver.bind(undefined),
   handleObservers: handleObservers.bind(undefined),
   setupObserver: setupObserver.bind(undefined)
 };
 
-/**
- * @mixin backed
- * @param {string} type Name of the event
- * @param {HTMLElement} target Name of the event
- * @param {string|boolean|number|object|array} detail
- */
 var fireEvent = (type=String, detail=null, target=document) => {
   target.dispatchEvent(new CustomEvent(type, {detail: detail}));
 };
 
-/**
- * @mixin Backed
- *
- * some-prop -> someProp
- *
- * @arg {string} string The content to convert
- * @return {string} string
- */
 var toJsProp = string => {
   let parts = string.split('-');
   if (parts.length > 1) {
@@ -154,35 +162,40 @@ var Pubsub = class {
 
   /**
    * @param {String} event
-   * @param {String|Number|Boolean|Object|Array} value
+   * @param {String|Number|Boolean|Object|Array} change
    */
-  publish(event, value) {
+  publish(event, change) {
     for (let i = 0; i < this.handlers.length; i++) {
       if (this.handlers[i].event === event) {
-        this.handlers[i].handler(event, value, this.handlers[i].oldValue);
-        this.handlers[i].oldValue = value;
+        let oldValue = this.handlers[i].oldValue || {};
+        // dirty checking value, ensures that we don't create a loop
+        if (oldValue.value !== change.value) {
+          this.handlers[i].handler(change, this.handlers[i].oldValue);
+          this.handlers[i].oldValue = change;
+        }
       }
     }
   }
 };
 
-var PubSubLoader = isNode => {
-  if (isNode) {
-    global.PubSub =  global.PubSub || new Pubsub();
-  } else {
+var PubSubLoader = isWindow => {
+  if (isWindow) {
     window.PubSub = window.PubSub || new Pubsub();
+  } else {
+    global.PubSub = global.PubSub || new Pubsub();
   }
 };
 
-const isNode = () => {
+const supportsCustomElementsV1 = 'customElements' in window;
+const supportsCustomElementsV0 = 'registerElement' in document;
+
+const isWindow = () => {
   try {
-    return global;
-  }catch(e){
+    return window;
+  } catch(e) {
     return false;
   }
 };
-
-PubSubLoader(isNode());
 
 /**
  *
@@ -194,30 +207,50 @@ var backed = _class => {
     return string.replace(/([A-Z])/g, "-$1").toLowerCase().replace('-', '');
   };
 
-  const construct = (name, _class) => {
-    if (isNode()) {
-      return _class;
-    } else {
-      customElements.define(name, _class);
-    }
-  };
-
-
   // get the tagName or try to make one with class.name
   let name = _class.is || upperToHyphen(_class.name);
-  // Setup properties & mixins
-  // define/register custom-element
-  return construct(name, class extends _class {
-    constructor() {
-      super();
-      this.fireEvent = fireEvent.bind(this);
-      this.toJsProp = toJsProp.bind(this);
-      this.loadScript = loadScript.bind(this);
+  // Setup properties & observers
 
-      Utils.handleProperties(this, _class.properties);
-      Utils.handleObservers(this, _class.observers);
+    if (isWindow()) {
+      if (supportsCustomElementsV1) {
+        let klass = class extends _class {
+          constructor() {
+            super();
+            this.created();
+          }
+          created() {
+            PubSubLoader(isWindow());
+            this.fireEvent = fireEvent.bind(this);
+            this.toJsProp = toJsProp.bind(this);
+            this.loadScript = loadScript.bind(this);
+
+            base.handleProperties(this, _class.properties);
+            base.handleObservers(this, _class.observers, _class.globalObservers);
+          }
+        };
+        customElements.define(name, klass);
+      } else if (supportsCustomElementsV0) {
+        let klass = class extends _class {
+          createdCallback() {
+            this.created();
+          }
+          created() {
+            PubSubLoader(isWindow());
+            this.fireEvent = fireEvent.bind(this);
+            this.toJsProp = toJsProp.bind(this);
+            this.loadScript = loadScript.bind(this);
+
+            base.handleProperties(this, _class.properties);
+            base.handleObservers(this, _class.observers, _class.globalObservers);
+          }
+        };
+        document.registerElement(name, klass);
+      } else {
+        console.warn('classes::unsupported');
+      }
+    } else {
+      return _class;
     }
-  });
 };
 
 module.exports = backed;
