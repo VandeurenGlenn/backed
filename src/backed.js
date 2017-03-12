@@ -1,5 +1,5 @@
 'use strict';
-import Utils from './utils';
+import base from './base.js';
 import fireEvent from './internals/fire-event.js';
 import toJsProp from './internals/to-js-prop.js';
 import loadScript from './internals/load-script.js';
@@ -13,8 +13,6 @@ const isWindow = () => {
   }
 };
 
-PubSubLoader(isWindow());
-
 /**
  *
  * @module backed
@@ -26,6 +24,7 @@ export default _class => {
   };
 
   const construct = (name, _class) => {
+  // define/register/return element
     if (isWindow()) {
       customElements.define(name, _class);
     } else {
@@ -36,17 +35,17 @@ export default _class => {
 
   // get the tagName or try to make one with class.name
   let name = _class.is || upperToHyphen(_class.name);
-  // Setup properties & mixins
-  // define/register custom-element
+  // Setup properties & observers
   return construct(name, class extends _class {
     constructor() {
       super();
+      PubSubLoader(isWindow());
       this.fireEvent = fireEvent.bind(this);
       this.toJsProp = toJsProp.bind(this);
       this.loadScript = loadScript.bind(this);
 
-      Utils.handleProperties(this, _class.properties);
-      Utils.handleObservers(this, _class.observers);
+      base.handleProperties(this, _class.properties);
+      base.handleObservers(this, _class.observers, _class.globalObservers);
     }
   });
 };

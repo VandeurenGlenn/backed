@@ -1,21 +1,31 @@
 'use strict';
-// import Bind from './bind.js';
 
 const handleProperties = (target, properties) => {
   if (properties) {
     for (let property of Object.keys(properties)) {
       const observer = properties[property].observer;
       const strict = properties[property].strict;
-      handlePropertyObserver(target, property, strict, observer);
+      const isGlobal = properties[property].global;
+      handlePropertyObserver(target, property, observer, {
+        strict: strict || false,
+        global: isGlobal || false
+      });
       // Bind(superclass, superclass.properties)
     }
   }
 }
 
-const handlePropertyObserver = (obj, property, strict, observer) => {
+const handlePropertyObserver = (obj, property, observer, opts={
+  strict: false, global:false
+}) => {
+
   if (observer && _needsObserverSetup(obj, property)) {
     obj.observedProperties.push(property);
-    setupObserver(obj, property, strict, observer)
+
+    if (opts.global) {
+      PubSub.subscribe(`global.${property}`, obj[observer]);
+    }
+    setupObserver(obj, property, observer, opts)
   }
 }
 
@@ -33,6 +43,22 @@ const _needsObserverSetup = (obj, property) => {
   }
 }
 
+const forObservers = (target, observers, isGlobal=false) => {
+  for (let observe of observers) {
+    let parts = observe.split(/\(|\)/g);
+    let fn = parts[0];
+    parts = parts.slice(1);
+    for (let property of parts) {
+      if (property.length) {
+        handlePropertyObserver(target, property, fn, {
+          strict: false,
+          global: isGlobal
+        });
+      }
+    }
+  }
+}
+
 /**
  * Runs a method on target whenever given property changes
  *
@@ -47,7 +73,9 @@ const _needsObserverSetup = (obj, property) => {
  * @arg {boolean} strict
  * @arg {method} fn The method to run on change
  */
-const setupObserver = (obj, property, strict=false, fn) => {
+const setupObserver = (obj, property, fn, opts={
+  strict: false, global: false
+}) => {
   Object.defineProperty(obj, property, {
     set(value) {
       this[`_${property}`] = value;
@@ -55,31 +83,26 @@ const setupObserver = (obj, property, strict=false, fn) => {
         property: property,
         value: value
       };
-      this[fn](data);
-      PubSub.publish(fn, data);
+      if (opts.global) {
+        data.instance = this;
+        PubSub.publish(`global.${property}`, data);
+      } else {
+        this[fn](data);
+      }
     },
     get() {
       return this[`_${property}`];
     },
-    configurable: strict ? false : true
+    configurable: opts.strict
   });
 }
 
 
-const handleObservers = (obj, observers) => {
-  if (!observers) {
+const handleObservers = (target, observers=[], globalObservers=[]) => {
+  if (!observers && !globalObservers) {
     return;
   }
-  for (let observe of observers) {
-    let parts = observe.split(/\(|\)/g);
-    let fn = parts[0];
-    parts = parts.slice(1);
-    for (let property of parts) {
-      if (property.length) {
-        handlePropertyObserver(obj, property, false, fn);
-      }
-    }
-  }
+  forObservers(target, observers);
 }
 
 export default {
