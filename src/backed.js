@@ -4,6 +4,8 @@ import fireEvent from './internals/fire-event.js';
 import toJsProp from './internals/to-js-prop.js';
 import loadScript from './internals/load-script.js';
 import PubSubLoader from './internals/pub-sub-loader.js';
+const supportsCustomElementsV1 = 'customElements' in window;
+const supportsCustomElementsV0 = 'registerElement' in document;
 
 const isWindow = () => {
   try {
@@ -23,29 +25,48 @@ export default _class => {
     return string.replace(/([A-Z])/g, "-$1").toLowerCase().replace('-', '');
   };
 
-  const construct = (name, _class) => {
-  // define/register/return element
-    if (isWindow()) {
-      customElements.define(name, _class);
-    } else {
-      return _class;
-    }
-  }
-
-
   // get the tagName or try to make one with class.name
   let name = _class.is || upperToHyphen(_class.name);
   // Setup properties & observers
-  return construct(name, class extends _class {
-    constructor() {
-      super();
-      PubSubLoader(isWindow());
-      this.fireEvent = fireEvent.bind(this);
-      this.toJsProp = toJsProp.bind(this);
-      this.loadScript = loadScript.bind(this);
 
-      base.handleProperties(this, _class.properties);
-      base.handleObservers(this, _class.observers, _class.globalObservers);
+    if (isWindow()) {
+      if (supportsCustomElementsV1) {
+        let klass = class extends _class {
+          constructor() {
+            super();
+            this.created();
+          }
+          created() {
+            PubSubLoader(isWindow());
+            this.fireEvent = fireEvent.bind(this);
+            this.toJsProp = toJsProp.bind(this);
+            this.loadScript = loadScript.bind(this);
+
+            base.handleProperties(this, _class.properties);
+            base.handleObservers(this, _class.observers, _class.globalObservers);
+          }
+        }
+        customElements.define(name, klass);
+      } else if (supportsCustomElementsV0) {
+        let klass = class extends _class {
+          createdCallback() {
+            this.created();
+          }
+          created() {
+            PubSubLoader(isWindow());
+            this.fireEvent = fireEvent.bind(this);
+            this.toJsProp = toJsProp.bind(this);
+            this.loadScript = loadScript.bind(this);
+
+            base.handleProperties(this, _class.properties);
+            base.handleObservers(this, _class.observers, _class.globalObservers);
+          }
+        }
+        document.registerElement(name, klass)
+      } else {
+        console.warn('classes::unsupported');
+      }
+    } else {
+      return _class;
     }
-  });
 };
