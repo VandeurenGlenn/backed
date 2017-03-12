@@ -1,6 +1,11 @@
 # backed [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-image]][daviddm-url] [![Coverage percentage][coveralls-image]][coveralls-url]
 > A collection of methods for easy &amp; fast es6 elements
 
+## Features
+- customElementsV1 support
+- Commonjs (node) support
+- Internal & global property observers
+
 ## Installation
 
 ```sh
@@ -14,6 +19,22 @@ $ npm install --save backed
 ## Usage
 
 Soon ...
+
+## Roadmap
+- [x] Support customElementsV1
+- [x] Support commonjs (node)
+- [x] Add observer support
+- [x] Add global observer support
+- [ ] Fallback to customElementsV0 when V1 is unsupported
+- [ ] Support running multiple Backed version
+
+## TODO
+
+- [ ] Add private property support
+- [ ] Bind properties & attributes (use pubsub to notify changes)
+- [ ] Update README
+- [ ] Add demo's
+- [ ] Add documentation
 
 ## License
 
