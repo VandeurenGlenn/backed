@@ -105,9 +105,20 @@ const handleObservers = (target, observers=[], globalObservers=[]) => {
   forObservers(target, observers);
 }
 
+const shouldReady = (klass, version) => {
+  if (klass.ready) {
+    return klass.ready()
+  } else if(version === 1 && !klass.ignoreV0) {
+    console.warn('Backed uses a ready method as lifeCycleCallback, things should work fine when CESV1 is supported, but CESV0 not, please see the documentation for more info');
+  } else if(version === 0) {
+    console.warn('Backed uses a ready method as lifeCycleCallback, please see the documentation for more info');
+  }
+}
+
 export default {
   handleProperties: handleProperties.bind(this),
   handlePropertyObserver: handlePropertyObserver.bind(this),
   handleObservers: handleObservers.bind(this),
-  setupObserver: setupObserver.bind(this)
+  setupObserver: setupObserver.bind(this),
+  shouldReady: shouldReady.bind(this)
 }
