@@ -1,4 +1,5 @@
 'use strict';
+import warnings from './warnings.js';
 
 const handleProperties = (target, properties) => {
   if (properties) {
@@ -109,9 +110,9 @@ const shouldReady = (klass, version) => {
   if (klass.ready) {
     return klass.ready()
   } else if(version === 1 && !klass.ignoreV0) {
-    console.warn('Backed uses a ready method as lifeCycleCallback, things should work fine when CESV1 is supported, but CESV0 not, please see the documentation for more info');
+    warnings.warn('CESV1');
   } else if(version === 0) {
-    console.warn('Backed uses a ready method as lifeCycleCallback, please see the documentation for more info');
+    warnings.warn('CESV0');
   }
 }
 
