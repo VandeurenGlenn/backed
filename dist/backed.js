@@ -1,6 +1,24 @@
 var Backed = (function () {
 'use strict';
 
+const _warnings = [];
+
+const warnings = {
+  CESV0: 'Backed uses a ready method as lifeCycleCallback, please see the documentation for more info',
+  CESV1: 'Backed uses a ready method as lifeCycleCallback, things should work fine when CESV1 is supported, but CESV0 not, please see the documentation for more info'
+};
+
+const warn = warning => {
+  if (!_warnings[warning]) {
+    console.warn(warnings[warning]);
+    _warnings.push(warning);
+  }
+};
+
+var warnings$1 = {
+  warn: warn
+};
+
 const handleProperties = (target, properties) => {
   if (properties) {
     for (let property of Object.keys(properties)) {
@@ -106,11 +124,22 @@ const handleObservers = (target, observers=[], globalObservers=[]) => {
   forObservers(target, observers);
 };
 
+const shouldReady = (klass, version) => {
+  if (klass.ready) {
+    return klass.ready()
+  } else if(version === 1 && !klass.ignoreV0) {
+    warnings$1.warn('CESV1');
+  } else if(version === 0) {
+    warnings$1.warn('CESV0');
+  }
+};
+
 var base = {
   handleProperties: handleProperties.bind(undefined),
   handlePropertyObserver: handlePropertyObserver.bind(undefined),
   handleObservers: handleObservers.bind(undefined),
-  setupObserver: setupObserver.bind(undefined)
+  setupObserver: setupObserver.bind(undefined),
+  shouldReady: shouldReady.bind(undefined)
 };
 
 /**
@@ -224,48 +253,54 @@ var backed = _class => {
 
   // get the tagName or try to make one with class.name
   let name = _class.is || upperToHyphen(_class.name);
+
   // Setup properties & observers
+  if (isWindow()) {
+    if (supportsCustomElementsV1) {
+      let klass = class extends _class {
+        constructor() {
+          super();
+          this.created();
+        }
+        created() {
+          PubSubLoader(isWindow());
+          this.fireEvent = fireEvent.bind(this);
+          this.toJsProp = toJsProp.bind(this);
+          this.loadScript = loadScript.bind(this);
 
-    if (isWindow()) {
-      if (supportsCustomElementsV1) {
-        let klass = class extends _class {
-          constructor() {
-            super();
-            this.created();
-          }
-          created() {
-            PubSubLoader(isWindow());
-            this.fireEvent = fireEvent.bind(this);
-            this.toJsProp = toJsProp.bind(this);
-            this.loadScript = loadScript.bind(this);
+          base.handleProperties(this, _class.properties);
+          base.handleObservers(this, _class.observers, _class.globalObservers);
 
-            base.handleProperties(this, _class.properties);
-            base.handleObservers(this, _class.observers, _class.globalObservers);
-          }
-        };
-        customElements.define(name, klass);
-      } else if (supportsCustomElementsV0) {
-        let klass = class extends _class {
-          createdCallback() {
-            this.created();
-          }
-          created() {
-            PubSubLoader(isWindow());
-            this.fireEvent = fireEvent.bind(this);
-            this.toJsProp = toJsProp.bind(this);
-            this.loadScript = loadScript.bind(this);
+          // notify the user that we expect a ready callback (constructor is ignored when not CESV1)
+          base.shouldReady(_class, 1);
+        }
+      };
+      customElements.define(name, klass);
+    } else if (supportsCustomElementsV0) {
+      let klass = class extends _class {
+        createdCallback() {
+          this.created();
+        }
+        created() {
+          PubSubLoader(isWindow());
+          this.fireEvent = fireEvent.bind(this);
+          this.toJsProp = toJsProp.bind(this);
+          this.loadScript = loadScript.bind(this);
 
-            base.handleProperties(this, _class.properties);
-            base.handleObservers(this, _class.observers, _class.globalObservers);
-          }
-        };
-        document.registerElement(name, klass);
-      } else {
-        console.warn('classes::unsupported');
-      }
+          base.handleProperties(this, _class.properties);
+          base.handleObservers(this, _class.observers, _class.globalObservers);
+
+          // notify the user that we expect a ready callback (constructor is ignored when not CESV1)
+          base.shouldReady(_class, 0);
+        }
+      };
+      document.registerElement(name, klass);
     } else {
-      return _class;
+      console.warn('classes::unsupported');
     }
+  } else {
+    return _class;
+  }
 };
 
 return backed;
