@@ -46,7 +46,7 @@ export default _class => {
           base.handleObservers(this, _class.observers, _class.globalObservers);
 
           // notify the user that we expect a ready callback (constructor is ignored when not CESV1)
-          base.shouldReady(_class, 1);
+          base.shouldReady(this, 1);
         }
       }
       customElements.define(name, klass);
@@ -65,10 +65,10 @@ export default _class => {
           base.handleObservers(this, _class.observers, _class.globalObservers);
 
           // notify the user that we expect a ready callback (constructor is ignored when not CESV1)
-          base.shouldReady(_class, 0);
+          base.shouldReady(this, 1);
         }
       }
-      document.registerElement(name, klass)
+      document.registerElement(name, klass);
     } else {
       console.warn('classes::unsupported');
     }

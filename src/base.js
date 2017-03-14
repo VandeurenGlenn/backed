@@ -106,10 +106,10 @@ const handleObservers = (target, observers=[], globalObservers=[]) => {
   forObservers(target, observers);
 }
 
-const shouldReady = (klass, version) => {
-  if (klass.ready) {
-    return klass.ready()
-  } else if(version === 1 && !klass.ignoreV0) {
+const shouldReady = (target, version) => {
+  if (target.ready) {
+    return target.ready()
+  } else if(version === 1 && !target.ignoreV0) {
     warnings.warn('CESV1');
   } else if(version === 0) {
     warnings.warn('CESV0');
