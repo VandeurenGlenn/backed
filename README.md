@@ -18,7 +18,40 @@ $ npm install --save backed
 
 ## Usage
 
-Soon ...
+### Basic usage
+```js
+Backed(class extends HTMLElement {
+  constructor() { // note that constructors are ignored when running as a customElement V0
+    super();
+  }
+  ready() {
+    // ready to go ...
+  }
+});
+```
+
+### Using observers
+
+```js
+Backed(class extends HTMLElement {
+  static get properties() {
+    return {
+      name: {
+        observer: 'change'
+      }
+    }
+  }
+  constructor() {
+    super();
+  }
+  ready() {
+    // ready to go ...
+  }
+  change(change) {
+    console.log(change);
+  }
+});
+```
 
 ## Roadmap
 - [x] Support customElementsV1
