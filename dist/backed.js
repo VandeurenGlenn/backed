@@ -124,10 +124,10 @@ const handleObservers = (target, observers=[], globalObservers=[]) => {
   forObservers(target, observers);
 };
 
-const shouldReady = (klass, version) => {
-  if (klass.ready) {
-    return klass.ready()
-  } else if(version === 1 && !klass.ignoreV0) {
+const shouldReady = (target, version) => {
+  if (target.ready) {
+    return target.ready()
+  } else if(version === 1 && !target.ignoreV0) {
     warnings$1.warn('CESV1');
   } else if(version === 0) {
     warnings$1.warn('CESV0');
@@ -272,7 +272,7 @@ var backed = _class => {
           base.handleObservers(this, _class.observers, _class.globalObservers);
 
           // notify the user that we expect a ready callback (constructor is ignored when not CESV1)
-          base.shouldReady(_class, 1);
+          base.shouldReady(this, 1);
         }
       };
       customElements.define(name, klass);
@@ -291,7 +291,7 @@ var backed = _class => {
           base.handleObservers(this, _class.observers, _class.globalObservers);
 
           // notify the user that we expect a ready callback (constructor is ignored when not CESV1)
-          base.shouldReady(_class, 0);
+          base.shouldReady(this, 1);
         }
       };
       document.registerElement(name, klass);
