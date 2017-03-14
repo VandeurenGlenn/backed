@@ -67,6 +67,9 @@ export default _class => {
           // notify the user that we expect a ready callback (constructor is ignored when not CESV1)
           base.shouldReady(this, 1);
         }
+        get attachShadow() {
+          return this.createShadowRoot();
+        }
       }
       document.registerElement(name, klass);
     } else {
