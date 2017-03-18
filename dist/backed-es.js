@@ -234,13 +234,15 @@ var backed = _class => {
     return string.replace(/([A-Z])/g, "-$1").toLowerCase().replace('-', '');
   };
 
+  let klass;
+
   // get the tagName or try to make one with class.name
   let name = _class.is || upperToHyphen(_class.name);
 
   // Setup properties & observers
   if (isWindow()) {
     if (supportsCustomElementsV1) {
-      let klass = class extends _class {
+      klass = class extends _class {
         constructor() {
           super();
           this.created();
@@ -260,7 +262,7 @@ var backed = _class => {
       };
       customElements.define(name, klass);
     } else if (supportsCustomElementsV0) {
-      let klass = class extends _class {
+      klass = class extends _class {
         createdCallback() {
           this.created();
         }
@@ -276,14 +278,18 @@ var backed = _class => {
           // notify the user that we expect a ready callback (constructor is ignored when not CESV1)
           base.shouldReady(this, 1);
         }
+        get attachShadow() {
+          return this.createShadowRoot();
+        }
       };
       document.registerElement(name, klass);
     } else {
       console.warn('classes::unsupported');
     }
   } else {
-    return _class;
+    klass = _class;
   }
+  return klass;
 };
 
 export default backed;
