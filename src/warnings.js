@@ -5,9 +5,9 @@ const warnings = {
   CESV1: 'Backed uses a ready method as lifeCycleCallback, things should work fine when CESV1 is supported, but CESV0 not, please see the documentation for more info'
 };
 
-const warn = warning => {
+const warn = (name, warning) => {
   if (!_warnings[warning]) {
-    console.warn(warnings[warning]);
+    console.warn(`${name}::${warnings[warning]}`);
     _warnings.push(warning);
   }
 }

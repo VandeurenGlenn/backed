@@ -110,9 +110,9 @@ const shouldReady = (target, version) => {
   if (target.ready) {
     return target.ready()
   } else if(version === 1 && !target.ignoreV0) {
-    warnings.warn('CESV1');
+    warnings.warn(target.name, 'CESV1');
   } else if(version === 0) {
-    warnings.warn('CESV0');
+    warnings.warn(target.name, 'CESV0');
   }
 }
 
