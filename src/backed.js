@@ -53,7 +53,7 @@ export default _class => {
       }
       customElements.define(name, klass);
     } else if (supportsCustomElementsV0) {
-      klass = class extends _class {
+      klass = document.registerElement(name, class extends _class {
         createdCallback() {
           this.created();
         }
@@ -72,8 +72,7 @@ export default _class => {
         get attachShadow() {
           return this.createShadowRoot();
         }
-      }
-      document.registerElement(name, klass);
+      })
     } else {
       console.warn('classes::unsupported');
     }
