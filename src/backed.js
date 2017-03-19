@@ -69,7 +69,8 @@ export default _class => {
           // notify the user that we expect a ready callback (constructor is ignored when not CESV1)
           base.shouldReady(this, 1);
         }
-        get attachShadow() {
+        attachShadow() {
+          // TODO: feature detect shadowDOM for V1
           return this.createShadowRoot();
         }
       })
