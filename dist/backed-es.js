@@ -5,9 +5,9 @@ const warnings = {
   CESV1: 'Backed uses a ready method as lifeCycleCallback, things should work fine when CESV1 is supported, but CESV0 not, please see the documentation for more info'
 };
 
-const warn = warning => {
+const warn = (name, warning) => {
   if (!_warnings[warning]) {
-    console.warn(warnings[warning]);
+    console.warn(`${name}::${warnings[warning]}`);
     _warnings.push(warning);
   }
 };
@@ -125,9 +125,9 @@ const shouldReady = (target, version) => {
   if (target.ready) {
     return target.ready()
   } else if(version === 1 && !target.ignoreV0) {
-    warnings$1.warn('CESV1');
+    warnings$1.warn(target.name, 'CESV1');
   } else if(version === 0) {
-    warnings$1.warn('CESV0');
+    warnings$1.warn(target.name, 'CESV0');
   }
 };
 
@@ -262,7 +262,7 @@ var backed = _class => {
       };
       customElements.define(name, klass);
     } else if (supportsCustomElementsV0) {
-      klass = class extends _class {
+      klass = document.registerElement(name, class extends _class {
         createdCallback() {
           this.created();
         }
@@ -278,11 +278,11 @@ var backed = _class => {
           // notify the user that we expect a ready callback (constructor is ignored when not CESV1)
           base.shouldReady(this, 1);
         }
-        get attachShadow() {
+        attachShadow() {
+          // TODO: feature detect shadowDOM for V1
           return this.createShadowRoot();
         }
-      };
-      document.registerElement(name, klass);
+      });
     } else {
       console.warn('classes::unsupported');
     }
