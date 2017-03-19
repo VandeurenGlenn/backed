@@ -122,12 +122,13 @@ const handleObservers = (target, observers=[], globalObservers=[]) => {
 };
 
 const shouldReady = (target, version) => {
+  const name = target.localName || target.name || target.is;
   if (target.ready) {
     return target.ready()
   } else if(version === 1 && !target.ignoreV0) {
-    warnings$1.warn(target.name, 'CESV1');
+    warnings$1.warn(name, 'CESV1');
   } else if(version === 0) {
-    warnings$1.warn(target.name, 'CESV0');
+    warnings$1.warn(name, 'CESV0');
   }
 };
 
