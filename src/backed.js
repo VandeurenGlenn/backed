@@ -36,9 +36,16 @@ export default _class => {
       klass = class extends _class {
         constructor() {
           super();
-          this.created();
+          if (this.created) this.created();
+          this._created();
         }
-        created() {
+        connectedCallback() {
+          if (this.connected) this.connected();
+        }
+        disconnectedCallback() {
+          if (this.disconnected) this.disconnected();
+        }
+        _created() {
           PubSubLoader(isWindow());
           this.fireEvent = fireEvent.bind(this);
           this.toJsProp = toJsProp.bind(this);
@@ -47,17 +54,24 @@ export default _class => {
           base.handleProperties(this, _class.properties);
           base.handleObservers(this, _class.observers, _class.globalObservers);
 
-          // notify the user that we expect a ready callback (constructor is ignored when not CESV1)
-          base.shouldReady(this, 1);
+          // notify everything is ready
+          base.ready(this);
         }
       }
       customElements.define(name, klass);
     } else if (supportsCustomElementsV0) {
       klass = document.registerElement(name, class extends _class {
         createdCallback() {
-          this.created();
+          if (this.created) this.created();
+          this._created();
         }
-        created() {
+        attachedCallback() {
+          if (this.connected) this.connected();
+        }
+        detachedCallback() {
+          if (this.disconnected) this.disconnected();
+        }
+        _created() {
           PubSubLoader(isWindow());
           this.fireEvent = fireEvent.bind(this);
           this.toJsProp = toJsProp.bind(this);
@@ -66,8 +80,8 @@ export default _class => {
           base.handleProperties(this, _class.properties);
           base.handleObservers(this, _class.observers, _class.globalObservers);
 
-          // notify the user that we expect a ready callback (constructor is ignored when not CESV1)
-          base.shouldReady(this, 1);
+          // notify everything is ready
+          base.ready(this);
         }
         attachShadow() {
           // TODO: feature detect shadowDOM for V1
@@ -78,6 +92,7 @@ export default _class => {
       console.warn('classes::unsupported');
     }
   } else {
+    // TODO: handle Commonjs (properties, observers, etc ...)
     klass = _class;
   }
   return klass;

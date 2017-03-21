@@ -1,6 +1,4 @@
 'use strict';
-import warnings from './warnings.js';
-
 const handleProperties = (target, properties) => {
   if (properties) {
     for (let property of Object.keys(properties)) {
@@ -106,15 +104,10 @@ const handleObservers = (target, observers=[], globalObservers=[]) => {
   forObservers(target, observers);
 }
 
-const shouldReady = (target, version) => {
-  const name = target.localName || target.name || target.is;
-  if (target.ready) {
-    return target.ready()
-  } else if(version === 1 && !target.ignoreV0) {
-    warnings.warn(name, 'CESV1');
-  } else if(version === 0) {
-    warnings.warn(name, 'CESV0');
-  }
+const ready = target => {
+  requestAnimationFrame(() => {
+    if (target.ready) target.ready();
+  });
 }
 
 export default {
@@ -122,5 +115,5 @@ export default {
   handlePropertyObserver: handlePropertyObserver.bind(this),
   handleObservers: handleObservers.bind(this),
   setupObserver: setupObserver.bind(this),
-  shouldReady: shouldReady.bind(this)
+  ready: ready.bind(this)
 }
