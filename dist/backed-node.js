@@ -1,23 +1,5 @@
 'use strict';
 
-const _warnings = [];
-
-const warnings = {
-  CESV0: 'Backed uses a ready method as lifeCycleCallback, please see the documentation for more info',
-  CESV1: 'Backed uses a ready method as lifeCycleCallback, things should work fine when CESV1 is supported, but CESV0 not, please see the documentation for more info'
-};
-
-const warn = (name, warning) => {
-  if (!_warnings[warning]) {
-    console.warn(`${name}::${warnings[warning]}`);
-    _warnings.push(warning);
-  }
-};
-
-var warnings$1 = {
-  warn: warn
-};
-
 const handleProperties = (target, properties) => {
   if (properties) {
     for (let property of Object.keys(properties)) {
@@ -123,15 +105,10 @@ const handleObservers = (target, observers=[], globalObservers=[]) => {
   forObservers(target, observers);
 };
 
-const shouldReady = (target, version) => {
-  const name = target.localName || target.name || target.is;
-  if (target.ready) {
-    return target.ready()
-  } else if(version === 1 && !target.ignoreV0) {
-    warnings$1.warn(name, 'CESV1');
-  } else if(version === 0) {
-    warnings$1.warn(name, 'CESV0');
-  }
+const ready = target => {
+  requestAnimationFrame(() => {
+    if (target.ready) target.ready();
+  });
 };
 
 var base = {
@@ -139,7 +116,7 @@ var base = {
   handlePropertyObserver: handlePropertyObserver.bind(undefined),
   handleObservers: handleObservers.bind(undefined),
   setupObserver: setupObserver.bind(undefined),
-  shouldReady: shouldReady.bind(undefined)
+  ready: ready.bind(undefined)
 };
 
 var fireEvent = (type=String, detail=null, target=document) => {
@@ -248,9 +225,16 @@ var backed = _class => {
       klass = class extends _class {
         constructor() {
           super();
-          this.created();
+          if (this.created) this.created();
+          this._created();
         }
-        created() {
+        connectedCallback() {
+          if (this.connected) this.connected();
+        }
+        disconnectedCallback() {
+          if (this.disconnected) this.disconnected();
+        }
+        _created() {
           PubSubLoader(isWindow());
           this.fireEvent = fireEvent.bind(this);
           this.toJsProp = toJsProp.bind(this);
@@ -259,17 +243,24 @@ var backed = _class => {
           base.handleProperties(this, _class.properties);
           base.handleObservers(this, _class.observers, _class.globalObservers);
 
-          // notify the user that we expect a ready callback (constructor is ignored when not CESV1)
-          base.shouldReady(this, 1);
+          // notify everything is ready
+          base.ready(this);
         }
       };
       customElements.define(name, klass);
     } else if (supportsCustomElementsV0) {
       klass = document.registerElement(name, class extends _class {
         createdCallback() {
-          this.created();
+          if (this.created) this.created();
+          this._created();
         }
-        created() {
+        attachedCallback() {
+          if (this.connected) this.connected();
+        }
+        detachedCallback() {
+          if (this.disconnected) this.disconnected();
+        }
+        _created() {
           PubSubLoader(isWindow());
           this.fireEvent = fireEvent.bind(this);
           this.toJsProp = toJsProp.bind(this);
@@ -278,8 +269,8 @@ var backed = _class => {
           base.handleProperties(this, _class.properties);
           base.handleObservers(this, _class.observers, _class.globalObservers);
 
-          // notify the user that we expect a ready callback (constructor is ignored when not CESV1)
-          base.shouldReady(this, 1);
+          // notify everything is ready
+          base.ready(this);
         }
         attachShadow() {
           // TODO: feature detect shadowDOM for V1
@@ -290,6 +281,7 @@ var backed = _class => {
       console.warn('classes::unsupported');
     }
   } else {
+    // TODO: handle Commonjs (properties, observers, etc ...)
     klass = _class;
   }
   return klass;
