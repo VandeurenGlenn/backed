@@ -53,6 +53,9 @@ Backed(class extends HTMLElement {
 });
 ```
 
+## More info
+- [wiki](https://github.com/VandeurenGlenn/backed/wiki)
+
 ## Roadmap
 - [x] Support customElementsV1
 - [x] Support commonjs (node)
@@ -64,6 +67,7 @@ Backed(class extends HTMLElement {
 ## TODO
 
 - [ ] Add private property support
+- [ ] Handle Commonjs (properties, observers, etc ...)
 - [ ] Bind properties & attributes (use pubsub to notify changes)
 - [ ] Update README
 - [ ] Add demo's
