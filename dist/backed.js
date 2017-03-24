@@ -11,6 +11,7 @@ const handleProperties = (target, properties) => {
         strict: strict || false,
         global: isGlobal || false
       });
+      target[property] = properties[property].value;
       // Bind(superclass, superclass.properties)
     }
   }
@@ -24,7 +25,7 @@ const handlePropertyObserver = (obj, property, observer, opts={
     obj.observedProperties.push(property);
 
     if (opts.global) {
-      PubSub.subscribe(`global.${property}`, obj[observer]);
+      PubSub.subscribe(`global.${property}`, obj[observer].bind(obj));
     }
     setupObserver(obj, property, observer, opts);
   }
