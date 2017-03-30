@@ -22,7 +22,8 @@ const handlePropertyObserver = (obj, property, observer, opts={
   if (observer && _needsObserverSetup(obj, property)) {
     obj.observedProperties.push(property);
 
-    if (opts.global) {
+    // subscribe only when a callback is defined, all other global options are still available ...
+    if (opts.global && obj[observer]) {
       PubSub.subscribe(`global.${property}`, obj[observer].bind(obj));
     }
     setupObserver(obj, property, observer, opts)
