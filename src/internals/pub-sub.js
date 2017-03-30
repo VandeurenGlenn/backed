@@ -27,11 +27,11 @@ export default class {
   publish(event, change) {
     for (let i = 0; i < this.handlers.length; i++) {
       if (this.handlers[i].event === event) {
-        let oldValue = this.handlers[i].oldValue || {};
+        let oldValue = this.handlers[i].oldValue;
         // dirty checking value, ensures that we don't create a loop
-        if (oldValue.value !== change.value) {
+        if (oldValue !== change.value) {
           this.handlers[i].handler(change, this.handlers[i].oldValue);
-          this.handlers[i].oldValue = change;
+          this.handlers[i].oldValue = change.value;
         }
       }
     }
