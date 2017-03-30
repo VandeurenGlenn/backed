@@ -54,6 +54,9 @@ const setupObserver = (obj, property, fn, opts = {
 }) => {
   Object.defineProperty(obj, property, {
     set(value) {
+      if (this[`_${property}`] === value) {
+        return;
+      }
       this[`_${property}`] = value;
       let data = {
         property: property,
@@ -131,10 +134,10 @@ var Pubsub = class {
   publish(event, change) {
     for (let i = 0; i < this.handlers.length; i++) {
       if (this.handlers[i].event === event) {
-        let oldValue = this.handlers[i].oldValue || {};
-        if (oldValue.value !== change.value) {
+        let oldValue = this.handlers[i].oldValue;
+        if (oldValue !== change.value) {
           this.handlers[i].handler(change, this.handlers[i].oldValue);
-          this.handlers[i].oldValue = change;
+          this.handlers[i].oldValue = change.value;
         }
       }
     }

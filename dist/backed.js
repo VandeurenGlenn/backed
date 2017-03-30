@@ -117,6 +117,9 @@ var setupObserver = function setupObserver(obj, property, fn) {
   };
   Object.defineProperty(obj, property, {
     set: function set(value) {
+      if (this['_' + property] === value) {
+        return;
+      }
       this['_' + property] = value;
       var data = {
         property: property,
@@ -270,10 +273,10 @@ var _class = function () {
     value: function publish(event, change) {
       for (var i = 0; i < this.handlers.length; i++) {
         if (this.handlers[i].event === event) {
-          var oldValue = this.handlers[i].oldValue || {};
-          if (oldValue.value !== change.value) {
+          var oldValue = this.handlers[i].oldValue;
+          if (oldValue !== change.value) {
             this.handlers[i].handler(change, this.handlers[i].oldValue);
-            this.handlers[i].oldValue = change;
+            this.handlers[i].oldValue = change.value;
           }
         }
       }
