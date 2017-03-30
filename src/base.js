@@ -79,6 +79,9 @@ const setupObserver = (obj, property, fn, opts={
 }) => {
   Object.defineProperty(obj, property, {
     set(value) {
+      if (this[`_${property}`] === value) {
+        return;
+      }
       this[`_${property}`] = value;
       let data = {
         property: property,
