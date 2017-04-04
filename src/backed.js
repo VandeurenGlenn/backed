@@ -36,7 +36,7 @@ export default _class => {
       klass = class extends _class {
         constructor() {
           super();
-          if (this.created) this.created();
+          if (!this.registered && this.created) this.created();
           this._created();
         }
         connectedCallback() {
@@ -56,13 +56,16 @@ export default _class => {
 
           // notify everything is ready
           base.ready(this);
+
+          // let backed know the element is registered
+          this.registered = true;
         }
       }
       customElements.define(name, klass);
     } else if (supportsCustomElementsV0) {
       klass = document.registerElement(name, class extends _class {
         createdCallback() {
-          if (this.created) this.created();
+          if (!this.registered && this.created) this.created();
           this._created();
         }
         attachedCallback() {
@@ -82,6 +85,8 @@ export default _class => {
 
           // notify everything is ready
           base.ready(this);
+          // let backed know the element is registered
+          this.registered = true;
         }
         attachShadow() {
           // TODO: feature detect shadowDOM for V1
