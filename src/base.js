@@ -77,6 +77,7 @@ const forObservers = (target, observers, isGlobal=false) => {
 const setupObserver = (obj, property, fn, opts={
   strict: false, global: false
 }) => {
+  const isConfigurable = opts.strict ? false : true;
   Object.defineProperty(obj, property, {
     set(value) {
       if (this[`_${property}`] === value) {
@@ -97,7 +98,7 @@ const setupObserver = (obj, property, fn, opts={
     get() {
       return this[`_${property}`];
     },
-    configurable: opts.strict
+    configurable: isConfigurable
   });
 }
 
