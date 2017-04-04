@@ -114,6 +114,7 @@ var setupObserver = function setupObserver(obj, property, fn) {
   var opts = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {
     strict: false, global: false
   };
+  var isConfigurable = opts.strict ? false : true;
   Object.defineProperty(obj, property, {
     set: function set(value) {
       if (this['_' + property] === value) {
@@ -134,7 +135,7 @@ var setupObserver = function setupObserver(obj, property, fn) {
     get: function get() {
       return this['_' + property];
     },
-    configurable: opts.strict
+    configurable: isConfigurable
   });
 };
 var handleObservers = function handleObservers(target) {
@@ -188,78 +189,12 @@ var loadScript = function loadScript(src) {
   });
 };
 
-var classCallCheck = function (instance, Constructor) {
-  if (!(instance instanceof Constructor)) {
-    throw new TypeError("Cannot call a class as a function");
-  }
-};
-
-var createClass = function () {
-  function defineProperties(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-
-  return function (Constructor, protoProps, staticProps) {
-    if (protoProps) defineProperties(Constructor.prototype, protoProps);
-    if (staticProps) defineProperties(Constructor, staticProps);
-    return Constructor;
-  };
-}();
-
-
-
-
-
-
-
-
-
-var inherits = function (subClass, superClass) {
-  if (typeof superClass !== "function" && superClass !== null) {
-    throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
-  }
-
-  subClass.prototype = Object.create(superClass && superClass.prototype, {
-    constructor: {
-      value: subClass,
-      enumerable: false,
-      writable: true,
-      configurable: true
-    }
-  });
-  if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
-};
-
-
-
-
-
-
-
-
-
-
-
-var possibleConstructorReturn = function (self, call) {
-  if (!self) {
-    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-  }
-
-  return call && (typeof call === "object" || typeof call === "function") ? call : self;
-};
-
 var _class = function () {
   function _class() {
-    classCallCheck(this, _class);
+    babelHelpers.classCallCheck(this, _class);
     this.handlers = [];
   }
-  createClass(_class, [{
+  babelHelpers.createClass(_class, [{
     key: 'subscribe',
     value: function subscribe(event, handler, context) {
       if (typeof context === 'undefined') {
@@ -310,15 +245,15 @@ var backed = (function (_class) {
   if (isWindow()) {
     if (supportsCustomElementsV1) {
       klass = function (_class2) {
-        inherits(klass, _class2);
+        babelHelpers.inherits(klass, _class2);
         function klass() {
-          classCallCheck(this, klass);
-          var _this = possibleConstructorReturn(this, (klass.__proto__ || Object.getPrototypeOf(klass)).call(this));
+          babelHelpers.classCallCheck(this, klass);
+          var _this = babelHelpers.possibleConstructorReturn(this, (klass.__proto__ || Object.getPrototypeOf(klass)).call(this));
           if (_this.created) _this.created();
           _this._created();
           return _this;
         }
-        createClass(klass, [{
+        babelHelpers.createClass(klass, [{
           key: 'connectedCallback',
           value: function connectedCallback() {
             if (this.connected) this.connected();
@@ -345,12 +280,12 @@ var backed = (function (_class) {
       customElements.define(name, klass);
     } else if (supportsCustomElementsV0) {
       klass = document.registerElement(name, function (_class4) {
-        inherits(_class3, _class4);
+        babelHelpers.inherits(_class3, _class4);
         function _class3() {
-          classCallCheck(this, _class3);
-          return possibleConstructorReturn(this, (_class3.__proto__ || Object.getPrototypeOf(_class3)).apply(this, arguments));
+          babelHelpers.classCallCheck(this, _class3);
+          return babelHelpers.possibleConstructorReturn(this, (_class3.__proto__ || Object.getPrototypeOf(_class3)).apply(this, arguments));
         }
-        createClass(_class3, [{
+        babelHelpers.createClass(_class3, [{
           key: 'createdCallback',
           value: function createdCallback() {
             if (this.created) this.created();
