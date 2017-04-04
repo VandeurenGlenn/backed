@@ -249,7 +249,7 @@ var backed = (function (_class) {
         function klass() {
           babelHelpers.classCallCheck(this, klass);
           var _this = babelHelpers.possibleConstructorReturn(this, (klass.__proto__ || Object.getPrototypeOf(klass)).call(this));
-          if (_this.created) _this.created();
+          if (!_this.registered && _this.created) _this.created();
           _this._created();
           return _this;
         }
@@ -273,6 +273,7 @@ var backed = (function (_class) {
             base.handleProperties(this, _class.properties);
             base.handleObservers(this, _class.observers, _class.globalObservers);
             base.ready(this);
+            this.registered = true;
           }
         }]);
         return klass;
@@ -288,7 +289,7 @@ var backed = (function (_class) {
         babelHelpers.createClass(_class3, [{
           key: 'createdCallback',
           value: function createdCallback() {
-            if (this.created) this.created();
+            if (!this.registered && this.created) this.created();
             this._created();
           }
         }, {
@@ -311,6 +312,7 @@ var backed = (function (_class) {
             base.handleProperties(this, _class.properties);
             base.handleObservers(this, _class.observers, _class.globalObservers);
             base.ready(this);
+            this.registered = true;
           }
         }, {
           key: 'attachShadow',

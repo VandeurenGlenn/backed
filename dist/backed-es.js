@@ -173,7 +173,7 @@ var backed = (_class => {
       klass = class extends _class {
         constructor() {
           super();
-          if (this.created) this.created();
+          if (!this.registered && this.created) this.created();
           this._created();
         }
         connectedCallback() {
@@ -190,13 +190,14 @@ var backed = (_class => {
           base.handleProperties(this, _class.properties);
           base.handleObservers(this, _class.observers, _class.globalObservers);
           base.ready(this);
+          this.registered = true;
         }
       };
       customElements.define(name, klass);
     } else if (supportsCustomElementsV0) {
       klass = document.registerElement(name, class extends _class {
         createdCallback() {
-          if (this.created) this.created();
+          if (!this.registered && this.created) this.created();
           this._created();
         }
         attachedCallback() {
@@ -213,6 +214,7 @@ var backed = (_class => {
           base.handleProperties(this, _class.properties);
           base.handleObservers(this, _class.observers, _class.globalObservers);
           base.ready(this);
+          this.registered = true;
         }
         attachShadow() {
           return this.createShadowRoot();
