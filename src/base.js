@@ -1,4 +1,30 @@
 'use strict';
+
+const setupTemplate = ({ name = null, shady = false }) => {
+  try {
+    const ownerDocument = document.currentScript.ownerDocument;
+    const template = ownerDocument.querySelector(`template[id="${name}"]`);
+    if (template) {
+      if (shady) {
+        ShadyCSS.prepareTemplate(template, name);
+      }
+      return template;
+    }
+  } catch (e) {
+    return console.warn(e);
+  }
+}
+
+const handleShadowRoot = ({ target = HTMLElement, template = null }) => {
+  if (!target.shadowRoot) {
+    target.attachShadow({mode: 'open'});
+    if (template) {
+      target.shadowRoot.appendChild(
+        document.importNode(template.content, true));
+    }
+  }
+}
+
 const handleProperties = (target, properties) => {
   if (properties) {
     for (let property of Object.keys(properties)) {
@@ -117,6 +143,8 @@ const ready = target => {
 }
 
 export default {
+  setupTemplate: setupTemplate.bind(this),
+  handleShadowRoot: handleShadowRoot.bind(this),
   handleProperties: handleProperties.bind(this),
   handlePropertyObserver: handlePropertyObserver.bind(this),
   handleObservers: handleObservers.bind(this),

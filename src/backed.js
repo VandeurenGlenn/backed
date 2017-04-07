@@ -6,6 +6,7 @@ import loadScript from './internals/load-script.js';
 import PubSubLoader from './internals/pub-sub-loader.js';
 const supportsCustomElementsV1 = 'customElements' in window;
 const supportsCustomElementsV0 = 'registerElement' in document;
+const supportsShadowDOMV1 = !!HTMLElement.prototype.attachShadow;
 
 const isWindow = () => {
   try {
@@ -32,14 +33,23 @@ export default _class => {
 
   // Setup properties & observers
   if (isWindow()) {
+    const template = base.setupTemplate({
+      name: name,
+      shady: !supportsShadowDOMV1
+    });
+
     if (supportsCustomElementsV1) {
       klass = class extends _class {
         constructor() {
           super();
+          if (!supportsShadowDOMV1) {
+            ShadyCSS.styleElement(this)
+          }
           if (!this.registered && this.created) this.created();
           this._created();
         }
         connectedCallback() {
+          base.handleShadowRoot({target: this, template: template});
           if (this.connected) this.connected();
         }
         disconnectedCallback() {
@@ -65,10 +75,14 @@ export default _class => {
     } else if (supportsCustomElementsV0) {
       klass = document.registerElement(name, class extends _class {
         createdCallback() {
+          if (!supportsShadowDOMV1) {
+            ShadyCSS.styleElement(this)
+          }
           if (!this.registered && this.created) this.created();
           this._created();
         }
         attachedCallback() {
+          base.handleShadowRoot({target: this, template: template});
           if (this.connected) this.connected();
         }
         detachedCallback() {

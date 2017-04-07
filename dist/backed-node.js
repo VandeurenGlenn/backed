@@ -1,5 +1,35 @@
 'use strict';
 
+var setupTemplate = function setupTemplate(_ref) {
+  var _ref$name = _ref.name,
+      name = _ref$name === undefined ? null : _ref$name,
+      _ref$shady = _ref.shady,
+      shady = _ref$shady === undefined ? false : _ref$shady;
+  try {
+    var ownerDocument = document.currentScript.ownerDocument;
+    var template = ownerDocument.querySelector('template[id="' + name + '"]');
+    if (template) {
+      if (shady) {
+        ShadyCSS.prepareTemplate(template, name);
+      }
+      return template;
+    }
+  } catch (e) {
+    return console.warn(e);
+  }
+};
+var handleShadowRoot = function handleShadowRoot(_ref2) {
+  var _ref2$target = _ref2.target,
+      target = _ref2$target === undefined ? HTMLElement : _ref2$target,
+      _ref2$template = _ref2.template,
+      template = _ref2$template === undefined ? null : _ref2$template;
+  if (!target.shadowRoot) {
+    target.attachShadow({ mode: 'open' });
+    if (template) {
+      target.shadowRoot.appendChild(document.importNode(template.content, true));
+    }
+  }
+};
 var handleProperties = function handleProperties(target, properties) {
   if (properties) {
     var _iteratorNormalCompletion = true;
@@ -152,6 +182,8 @@ var ready = function ready(target) {
   });
 };
 var base = {
+  setupTemplate: setupTemplate.bind(undefined),
+  handleShadowRoot: handleShadowRoot.bind(undefined),
   handleProperties: handleProperties.bind(undefined),
   handlePropertyObserver: handlePropertyObserver.bind(undefined),
   handleObservers: handleObservers.bind(undefined),
@@ -229,6 +261,7 @@ var PubSubLoader = (function (isWindow) {
 
 var supportsCustomElementsV1 = 'customElements' in window;
 var supportsCustomElementsV0 = 'registerElement' in document;
+var supportsShadowDOMV1 = !!HTMLElement.prototype.attachShadow;
 var isWindow = function isWindow() {
   try {
     return window;
@@ -243,12 +276,19 @@ var backed = (function (_class) {
   var klass = void 0;
   var name = _class.is || upperToHyphen(_class.name);
   if (isWindow()) {
+    var template = base.setupTemplate({
+      name: name,
+      shady: !supportsShadowDOMV1
+    });
     if (supportsCustomElementsV1) {
       klass = function (_class2) {
         babelHelpers.inherits(klass, _class2);
         function klass() {
           babelHelpers.classCallCheck(this, klass);
           var _this = babelHelpers.possibleConstructorReturn(this, (klass.__proto__ || Object.getPrototypeOf(klass)).call(this));
+          if (!supportsShadowDOMV1) {
+            ShadyCSS.styleElement(_this);
+          }
           if (!_this.registered && _this.created) _this.created();
           _this._created();
           return _this;
@@ -256,6 +296,7 @@ var backed = (function (_class) {
         babelHelpers.createClass(klass, [{
           key: 'connectedCallback',
           value: function connectedCallback() {
+            base.handleShadowRoot({ target: this, template: template });
             if (this.connected) this.connected();
           }
         }, {
@@ -289,12 +330,16 @@ var backed = (function (_class) {
         babelHelpers.createClass(_class3, [{
           key: 'createdCallback',
           value: function createdCallback() {
+            if (!supportsShadowDOMV1) {
+              ShadyCSS.styleElement(this);
+            }
             if (!this.registered && this.created) this.created();
             this._created();
           }
         }, {
           key: 'attachedCallback',
           value: function attachedCallback() {
+            base.handleShadowRoot({ target: this, template: template });
             if (this.connected) this.connected();
           }
         }, {
