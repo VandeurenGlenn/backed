@@ -1,6 +1,6 @@
 'use strict';
 
-const setupTemplate = ({ name = null, shady = false }) => {
+const setupTemplate = ({ name: name, shady: shady }) => {
   try {
     const ownerDocument = document.currentScript.ownerDocument;
     const template = ownerDocument.querySelector(`template[id="${name}"]`);
@@ -15,7 +15,7 @@ const setupTemplate = ({ name = null, shady = false }) => {
   }
 }
 
-const handleShadowRoot = ({ target = HTMLElement, template = null }) => {
+const handleShadowRoot = ({ target: target, template: template }) => {
   if (!target.shadowRoot) {
     target.attachShadow({mode: 'open'});
     if (template) {
