@@ -1,196 +1,5 @@
 'use strict';
 
-var setupTemplate = function setupTemplate(_ref) {
-  var _ref$name = _ref.name,
-      name = _ref$name === undefined ? null : _ref$name,
-      _ref$shady = _ref.shady,
-      shady = _ref$shady === undefined ? false : _ref$shady;
-  try {
-    var ownerDocument = document.currentScript.ownerDocument;
-    var template = ownerDocument.querySelector('template[id="' + name + '"]');
-    if (template) {
-      if (shady) {
-        ShadyCSS.prepareTemplate(template, name);
-      }
-      return template;
-    }
-  } catch (e) {
-    return console.warn(e);
-  }
-};
-var handleShadowRoot = function handleShadowRoot(_ref2) {
-  var _ref2$target = _ref2.target,
-      target = _ref2$target === undefined ? HTMLElement : _ref2$target,
-      _ref2$template = _ref2.template,
-      template = _ref2$template === undefined ? null : _ref2$template;
-  if (!target.shadowRoot) {
-    target.attachShadow({ mode: 'open' });
-    if (template) {
-      target.shadowRoot.appendChild(document.importNode(template.content, true));
-    }
-  }
-};
-var handleProperties = function handleProperties(target, properties) {
-  if (properties) {
-    var _iteratorNormalCompletion = true;
-    var _didIteratorError = false;
-    var _iteratorError = undefined;
-    try {
-      for (var _iterator = Object.keys(properties)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-        var property = _step.value;
-        var observer = properties[property].observer;
-        var strict = properties[property].strict;
-        var isGlobal = properties[property].global;
-        handlePropertyObserver(target, property, observer, {
-          strict: strict || false,
-          global: isGlobal || false
-        });
-        target[property] = properties[property].value;
-      }
-    } catch (err) {
-      _didIteratorError = true;
-      _iteratorError = err;
-    } finally {
-      try {
-        if (!_iteratorNormalCompletion && _iterator.return) {
-          _iterator.return();
-        }
-      } finally {
-        if (_didIteratorError) {
-          throw _iteratorError;
-        }
-      }
-    }
-  }
-};
-var handlePropertyObserver = function handlePropertyObserver(obj, property, observer) {
-  var opts = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {
-    strict: false, global: false
-  };
-  if (observer && _needsObserverSetup(obj, property)) {
-    obj.observedProperties.push(property);
-    if (opts.global && obj[observer]) {
-      PubSub.subscribe('global.' + property, obj[observer].bind(obj));
-    }
-    setupObserver(obj, property, observer, opts);
-  }
-};
-var _needsObserverSetup = function _needsObserverSetup(obj, property) {
-  if (!obj.observedProperties) {
-    obj.observedProperties = [];
-  }
-  if (obj.observedProperties[property]) {
-    console.warn('observer::ignoring duplicate property observer ' + property);
-    return false;
-  } else {
-    return true;
-  }
-};
-var forObservers = function forObservers(target, observers) {
-  var isGlobal = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-  var _iteratorNormalCompletion2 = true;
-  var _didIteratorError2 = false;
-  var _iteratorError2 = undefined;
-  try {
-    for (var _iterator2 = observers[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-      var observe = _step2.value;
-      var parts = observe.split(/\(|\)/g);
-      var fn = parts[0];
-      parts = parts.slice(1);
-      var _iteratorNormalCompletion3 = true;
-      var _didIteratorError3 = false;
-      var _iteratorError3 = undefined;
-      try {
-        for (var _iterator3 = parts[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-          var property = _step3.value;
-          if (property.length) {
-            handlePropertyObserver(target, property, fn, {
-              strict: false,
-              global: isGlobal
-            });
-          }
-        }
-      } catch (err) {
-        _didIteratorError3 = true;
-        _iteratorError3 = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion3 && _iterator3.return) {
-            _iterator3.return();
-          }
-        } finally {
-          if (_didIteratorError3) {
-            throw _iteratorError3;
-          }
-        }
-      }
-    }
-  } catch (err) {
-    _didIteratorError2 = true;
-    _iteratorError2 = err;
-  } finally {
-    try {
-      if (!_iteratorNormalCompletion2 && _iterator2.return) {
-        _iterator2.return();
-      }
-    } finally {
-      if (_didIteratorError2) {
-        throw _iteratorError2;
-      }
-    }
-  }
-};
-var setupObserver = function setupObserver(obj, property, fn) {
-  var opts = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {
-    strict: false, global: false
-  };
-  var isConfigurable = opts.strict ? false : true;
-  Object.defineProperty(obj, property, {
-    set: function set(value) {
-      if (this['_' + property] === value) {
-        return;
-      }
-      this['_' + property] = value;
-      var data = {
-        property: property,
-        value: value
-      };
-      if (opts.global) {
-        data.instance = this;
-        PubSub.publish('global.' + property, data);
-      } else {
-        this[fn](data);
-      }
-    },
-    get: function get() {
-      return this['_' + property];
-    },
-    configurable: isConfigurable
-  });
-};
-var handleObservers = function handleObservers(target) {
-  var observers = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
-  var globalObservers = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
-  if (!observers && !globalObservers) {
-    return;
-  }
-  forObservers(target, observers);
-};
-var ready = function ready(target) {
-  requestAnimationFrame(function () {
-    if (target.ready) target.ready();
-  });
-};
-var base = {
-  setupTemplate: setupTemplate.bind(undefined),
-  handleShadowRoot: handleShadowRoot.bind(undefined),
-  handleProperties: handleProperties.bind(undefined),
-  handlePropertyObserver: handlePropertyObserver.bind(undefined),
-  handleObservers: handleObservers.bind(undefined),
-  setupObserver: setupObserver.bind(undefined),
-  ready: ready.bind(undefined)
-};
-
 var fireEvent = (function () {
   var type = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : String;
   var detail = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
@@ -259,9 +68,256 @@ var PubSubLoader = (function (isWindow) {
   }
 });
 
+var shouldShim = function shouldShim() {
+  return (/Edge/.test(navigator.userAgent) || /Firefox/.test(navigator.userAgent)
+  );
+};
+var setupTemplate = function setupTemplate(_ref) {
+  var name = _ref.name,
+      shady = _ref.shady;
+  try {
+    var ownerDocument = document.currentScript.ownerDocument;
+    var template = ownerDocument.querySelector('template[id="' + name + '"]');
+    if (template) {
+      if (shady) {
+        ShadyCSS.prepareTemplate(template, name);
+      }
+      return template;
+    }
+  } catch (e) {
+    return console.warn(e);
+  }
+};
+var handleShadowRoot = function handleShadowRoot(_ref2) {
+  var target = _ref2.target,
+      template = _ref2.template;
+  if (!target.shadowRoot) {
+    target.attachShadow({ mode: 'open' });
+    if (template) {
+      target.shadowRoot.appendChild(document.importNode(template.content, true));
+      if (shouldShim()) {
+        var styles = target.shadowRoot.querySelectorAll('style');
+        var _shimmed = void 0;
+        if (styles[0]) {
+          _shimmed = document.createElement('style');
+          target.shadowRoot.insertBefore(_shimmed, target.shadowRoot.firstChild);
+        }
+        var _iteratorNormalCompletion = true;
+        var _didIteratorError = false;
+        var _iteratorError = undefined;
+        try {
+          for (var _iterator = styles[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            var style = _step.value;
+            _shimmed.innerHTML += style.innerHTML.replace(/:host\b/gm, target.localName).replace(/::content\b/gm, '');
+            target.shadowRoot.removeChild(style);
+          }
+        } catch (err) {
+          _didIteratorError = true;
+          _iteratorError = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion && _iterator.return) {
+              _iterator.return();
+            }
+          } finally {
+            if (_didIteratorError) {
+              throw _iteratorError;
+            }
+          }
+        }
+      }
+    }
+  }
+};
+var handleProperties = function handleProperties(target, properties) {
+  if (properties) {
+    var _iteratorNormalCompletion2 = true;
+    var _didIteratorError2 = false;
+    var _iteratorError2 = undefined;
+    try {
+      for (var _iterator2 = Object.keys(properties)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+        var property = _step2.value;
+        var observer = properties[property].observer;
+        var strict = properties[property].strict;
+        var isGlobal = properties[property].global;
+        handlePropertyObserver(target, property, observer, {
+          strict: strict || false,
+          global: isGlobal || false
+        });
+        target[property] = properties[property].value;
+      }
+    } catch (err) {
+      _didIteratorError2 = true;
+      _iteratorError2 = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion2 && _iterator2.return) {
+          _iterator2.return();
+        }
+      } finally {
+        if (_didIteratorError2) {
+          throw _iteratorError2;
+        }
+      }
+    }
+  }
+};
+var handlePropertyObserver = function handlePropertyObserver(obj, property, observer) {
+  var opts = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {
+    strict: false, global: false
+  };
+  if (observer && _needsObserverSetup(obj, property)) {
+    obj.observedProperties.push(property);
+    if (opts.global && obj[observer]) {
+      PubSub.subscribe('global.' + property, obj[observer].bind(obj));
+    }
+    setupObserver(obj, property, observer, opts);
+  }
+};
+var _needsObserverSetup = function _needsObserverSetup(obj, property) {
+  if (!obj.observedProperties) {
+    obj.observedProperties = [];
+  }
+  if (obj.observedProperties[property]) {
+    console.warn('observer::ignoring duplicate property observer ' + property);
+    return false;
+  } else {
+    return true;
+  }
+};
+var forObservers = function forObservers(target, observers) {
+  var isGlobal = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+  var _iteratorNormalCompletion3 = true;
+  var _didIteratorError3 = false;
+  var _iteratorError3 = undefined;
+  try {
+    for (var _iterator3 = observers[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+      var observe = _step3.value;
+      var parts = observe.split(/\(|\)/g);
+      var fn = parts[0];
+      parts = parts.slice(1);
+      var _iteratorNormalCompletion4 = true;
+      var _didIteratorError4 = false;
+      var _iteratorError4 = undefined;
+      try {
+        for (var _iterator4 = parts[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+          var property = _step4.value;
+          if (property.length) {
+            handlePropertyObserver(target, property, fn, {
+              strict: false,
+              global: isGlobal
+            });
+          }
+        }
+      } catch (err) {
+        _didIteratorError4 = true;
+        _iteratorError4 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion4 && _iterator4.return) {
+            _iterator4.return();
+          }
+        } finally {
+          if (_didIteratorError4) {
+            throw _iteratorError4;
+          }
+        }
+      }
+    }
+  } catch (err) {
+    _didIteratorError3 = true;
+    _iteratorError3 = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion3 && _iterator3.return) {
+        _iterator3.return();
+      }
+    } finally {
+      if (_didIteratorError3) {
+        throw _iteratorError3;
+      }
+    }
+  }
+};
+var setupObserver = function setupObserver(obj, property, fn) {
+  var opts = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {
+    strict: false, global: false
+  };
+  var isConfigurable = opts.strict ? false : true;
+  Object.defineProperty(obj, property, {
+    set: function set(value) {
+      if (this['_' + property] === value) {
+        return;
+      }
+      this['_' + property] = value;
+      var data = {
+        property: property,
+        value: value
+      };
+      if (opts.global) {
+        data.instance = this;
+        PubSub.publish('global.' + property, data);
+      } else {
+        this[fn](data);
+      }
+    },
+    get: function get() {
+      return this['_' + property];
+    },
+    configurable: isConfigurable
+  });
+};
+var handleObservers = function handleObservers(target) {
+  var observers = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+  var globalObservers = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+  if (!observers && !globalObservers) {
+    return;
+  }
+  forObservers(target, observers);
+};
+var ready = function ready(target) {
+  requestAnimationFrame(function () {
+    if (target.ready) target.ready();
+  });
+};
+var constructorCallback = function constructorCallback() {
+  var target = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : HTMLElement;
+  var hasWindow = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+  PubSubLoader(hasWindow);
+  if (!supportsShadowDOMV1) {
+    ShadyCSS.styleElement(target);
+  }
+  target.fireEvent = fireEvent.bind(target);
+  target.toJsProp = toJsProp.bind(target);
+  target.loadScript = loadScript.bind(target);
+  target.registered = true;
+  if (!target.registered && target.created) target.created();
+};
+var connectedCallback = function connectedCallback() {
+  var target = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : HTMLElement;
+  var klass = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : Function;
+  var template = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+  handleShadowRoot({ target: target, template: template });
+  if (target.connected) target.connected();
+  handleProperties(target, klass.properties);
+  handleObservers(target, klass.observers, klass.globalObservers);
+  ready(target);
+};
+var base = {
+  setupTemplate: setupTemplate.bind(undefined),
+  handleShadowRoot: handleShadowRoot.bind(undefined),
+  handleProperties: handleProperties.bind(undefined),
+  handlePropertyObserver: handlePropertyObserver.bind(undefined),
+  handleObservers: handleObservers.bind(undefined),
+  setupObserver: setupObserver.bind(undefined),
+  ready: ready.bind(undefined),
+  connectedCallback: connectedCallback.bind(undefined),
+  constructorCallback: constructorCallback.bind(undefined)
+};
+
 var supportsCustomElementsV1 = 'customElements' in window;
 var supportsCustomElementsV0 = 'registerElement' in document;
-var supportsShadowDOMV1 = !!HTMLElement.prototype.attachShadow;
+var supportsShadowDOMV1$1 = !!HTMLElement.prototype.attachShadow;
 var isWindow = function isWindow() {
   try {
     return window;
@@ -269,16 +325,17 @@ var isWindow = function isWindow() {
     return false;
   }
 };
+var hasWindow = isWindow();
 var backed = (function (_class) {
   var upperToHyphen = function upperToHyphen(string) {
     return string.replace(/([A-Z])/g, "-$1").toLowerCase().replace('-', '');
   };
   var klass = void 0;
   var name = _class.is || upperToHyphen(_class.name);
-  if (isWindow()) {
+  if (hasWindow) {
     var template = base.setupTemplate({
       name: name,
-      shady: !supportsShadowDOMV1
+      shady: !supportsShadowDOMV1$1
     });
     if (supportsCustomElementsV1) {
       klass = function (_class2) {
@@ -286,35 +343,18 @@ var backed = (function (_class) {
         function klass() {
           babelHelpers.classCallCheck(this, klass);
           var _this = babelHelpers.possibleConstructorReturn(this, (klass.__proto__ || Object.getPrototypeOf(klass)).call(this));
-          if (!supportsShadowDOMV1) {
-            ShadyCSS.styleElement(_this);
-          }
-          if (!_this.registered && _this.created) _this.created();
-          _this._created();
+          base.constructorCallback(_this, hasWindow);
           return _this;
         }
         babelHelpers.createClass(klass, [{
           key: 'connectedCallback',
           value: function connectedCallback() {
-            base.handleShadowRoot({ target: this, template: template });
-            if (this.connected) this.connected();
+            base.connectedCallback(this, _class, template);
           }
         }, {
           key: 'disconnectedCallback',
           value: function disconnectedCallback() {
             if (this.disconnected) this.disconnected();
-          }
-        }, {
-          key: '_created',
-          value: function _created() {
-            PubSubLoader(isWindow());
-            this.fireEvent = fireEvent.bind(this);
-            this.toJsProp = toJsProp.bind(this);
-            this.loadScript = loadScript.bind(this);
-            base.handleProperties(this, _class.properties);
-            base.handleObservers(this, _class.observers, _class.globalObservers);
-            base.ready(this);
-            this.registered = true;
           }
         }]);
         return klass;
@@ -330,34 +370,17 @@ var backed = (function (_class) {
         babelHelpers.createClass(_class3, [{
           key: 'createdCallback',
           value: function createdCallback() {
-            if (!supportsShadowDOMV1) {
-              ShadyCSS.styleElement(this);
-            }
-            if (!this.registered && this.created) this.created();
-            this._created();
+            base.constructorCallback(this, hasWindow);
           }
         }, {
           key: 'attachedCallback',
           value: function attachedCallback() {
-            base.handleShadowRoot({ target: this, template: template });
-            if (this.connected) this.connected();
+            base.connectedCallback(this, _class, template);
           }
         }, {
           key: 'detachedCallback',
           value: function detachedCallback() {
             if (this.disconnected) this.disconnected();
-          }
-        }, {
-          key: '_created',
-          value: function _created() {
-            PubSubLoader(isWindow());
-            this.fireEvent = fireEvent.bind(this);
-            this.toJsProp = toJsProp.bind(this);
-            this.loadScript = loadScript.bind(this);
-            base.handleProperties(this, _class.properties);
-            base.handleObservers(this, _class.observers, _class.globalObservers);
-            base.ready(this);
-            this.registered = true;
           }
         }, {
           key: 'attachShadow',

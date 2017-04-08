@@ -1,4 +1,66 @@
-const setupTemplate = ({ name = null, shady = false }) => {
+var fireEvent = ((type = String, detail = null, target = document) => {
+  target.dispatchEvent(new CustomEvent(type, { detail: detail }));
+});
+
+var toJsProp = (string => {
+  let parts = string.split('-');
+  if (parts.length > 1) {
+    var upper = parts[1].charAt(0).toUpperCase();
+    string = parts[0] + upper + parts[1].slice(1).toLowerCase();
+  }
+  return string;
+});
+
+const loadScript = src => {
+  return new Promise((resolve, reject) => {
+    let script = document.createElement('script');
+    script.src = src;
+    script.onload = result => {
+      resolve(result);
+    };
+    script.onerror = error => {
+      reject(error);
+    };
+    document.body.appendChild(script);
+  });
+};
+
+var Pubsub = class {
+  constructor() {
+    this.handlers = [];
+  }
+  subscribe(event, handler, context) {
+    if (typeof context === 'undefined') {
+      context = handler;
+    }
+    this.handlers.push({ event: event, handler: handler.bind(context) });
+  }
+  publish(event, change) {
+    for (let i = 0; i < this.handlers.length; i++) {
+      if (this.handlers[i].event === event) {
+        let oldValue = this.handlers[i].oldValue;
+        if (oldValue !== change.value) {
+          this.handlers[i].handler(change, this.handlers[i].oldValue);
+          this.handlers[i].oldValue = change.value;
+        }
+      }
+    }
+  }
+};
+
+var PubSubLoader = (isWindow => {
+  if (isWindow) {
+    window.PubSub = window.PubSub || new Pubsub();
+  } else {
+    global.PubSub = global.PubSub || new Pubsub();
+  }
+});
+
+const shouldShim = () => {
+  return (/Edge/.test(navigator.userAgent) || /Firefox/.test(navigator.userAgent)
+  );
+};
+const setupTemplate = ({ name: name, shady: shady }) => {
   try {
     const ownerDocument = document.currentScript.ownerDocument;
     const template = ownerDocument.querySelector(`template[id="${name}"]`);
@@ -12,11 +74,23 @@ const setupTemplate = ({ name = null, shady = false }) => {
     return console.warn(e);
   }
 };
-const handleShadowRoot = ({ target = HTMLElement, template = null }) => {
+const handleShadowRoot = ({ target: target, template: template }) => {
   if (!target.shadowRoot) {
     target.attachShadow({ mode: 'open' });
     if (template) {
       target.shadowRoot.appendChild(document.importNode(template.content, true));
+      if (shouldShim()) {
+        const styles = target.shadowRoot.querySelectorAll('style');
+        let _shimmed;
+        if (styles[0]) {
+          _shimmed = document.createElement('style');
+          target.shadowRoot.insertBefore(_shimmed, target.shadowRoot.firstChild);
+        }
+        for (let style of styles) {
+          _shimmed.innerHTML += style.innerHTML.replace(/:host\b/gm, target.localName).replace(/::content\b/gm, '');
+          target.shadowRoot.removeChild(style);
+        }
+      }
     }
   }
 };
@@ -109,6 +183,24 @@ const ready = target => {
     if (target.ready) target.ready();
   });
 };
+const constructorCallback = (target = HTMLElement, hasWindow = false) => {
+  PubSubLoader(hasWindow);
+  if (!supportsShadowDOMV1) {
+    ShadyCSS.styleElement(target);
+  }
+  target.fireEvent = fireEvent.bind(target);
+  target.toJsProp = toJsProp.bind(target);
+  target.loadScript = loadScript.bind(target);
+  target.registered = true;
+  if (!target.registered && target.created) target.created();
+};
+const connectedCallback = (target = HTMLElement, klass = Function, template = null) => {
+  handleShadowRoot({ target: target, template: template });
+  if (target.connected) target.connected();
+  handleProperties(target, klass.properties);
+  handleObservers(target, klass.observers, klass.globalObservers);
+  ready(target);
+};
 var base = {
   setupTemplate: setupTemplate.bind(undefined),
   handleShadowRoot: handleShadowRoot.bind(undefined),
@@ -116,70 +208,14 @@ var base = {
   handlePropertyObserver: handlePropertyObserver.bind(undefined),
   handleObservers: handleObservers.bind(undefined),
   setupObserver: setupObserver.bind(undefined),
-  ready: ready.bind(undefined)
+  ready: ready.bind(undefined),
+  connectedCallback: connectedCallback.bind(undefined),
+  constructorCallback: constructorCallback.bind(undefined)
 };
-
-var fireEvent = ((type = String, detail = null, target = document) => {
-  target.dispatchEvent(new CustomEvent(type, { detail: detail }));
-});
-
-var toJsProp = (string => {
-  let parts = string.split('-');
-  if (parts.length > 1) {
-    var upper = parts[1].charAt(0).toUpperCase();
-    string = parts[0] + upper + parts[1].slice(1).toLowerCase();
-  }
-  return string;
-});
-
-const loadScript = src => {
-  return new Promise((resolve, reject) => {
-    let script = document.createElement('script');
-    script.src = src;
-    script.onload = result => {
-      resolve(result);
-    };
-    script.onerror = error => {
-      reject(error);
-    };
-    document.body.appendChild(script);
-  });
-};
-
-var Pubsub = class {
-  constructor() {
-    this.handlers = [];
-  }
-  subscribe(event, handler, context) {
-    if (typeof context === 'undefined') {
-      context = handler;
-    }
-    this.handlers.push({ event: event, handler: handler.bind(context) });
-  }
-  publish(event, change) {
-    for (let i = 0; i < this.handlers.length; i++) {
-      if (this.handlers[i].event === event) {
-        let oldValue = this.handlers[i].oldValue;
-        if (oldValue !== change.value) {
-          this.handlers[i].handler(change, this.handlers[i].oldValue);
-          this.handlers[i].oldValue = change.value;
-        }
-      }
-    }
-  }
-};
-
-var PubSubLoader = (isWindow => {
-  if (isWindow) {
-    window.PubSub = window.PubSub || new Pubsub();
-  } else {
-    global.PubSub = global.PubSub || new Pubsub();
-  }
-});
 
 const supportsCustomElementsV1 = 'customElements' in window;
 const supportsCustomElementsV0 = 'registerElement' in document;
-const supportsShadowDOMV1 = !!HTMLElement.prototype.attachShadow;
+const supportsShadowDOMV1$1 = !!HTMLElement.prototype.attachShadow;
 const isWindow = () => {
   try {
     return window;
@@ -187,71 +223,42 @@ const isWindow = () => {
     return false;
   }
 };
+const hasWindow = isWindow();
 var backed = (_class => {
   const upperToHyphen = string => {
     return string.replace(/([A-Z])/g, "-$1").toLowerCase().replace('-', '');
   };
   let klass;
   let name = _class.is || upperToHyphen(_class.name);
-  if (isWindow()) {
+  if (hasWindow) {
     const template = base.setupTemplate({
       name: name,
-      shady: !supportsShadowDOMV1
+      shady: !supportsShadowDOMV1$1
     });
     if (supportsCustomElementsV1) {
       klass = class extends _class {
         constructor() {
           super();
-          if (!supportsShadowDOMV1) {
-            ShadyCSS.styleElement(this);
-          }
-          if (!this.registered && this.created) this.created();
-          this._created();
+          base.constructorCallback(this, hasWindow);
         }
         connectedCallback() {
-          base.handleShadowRoot({ target: this, template: template });
-          if (this.connected) this.connected();
+          base.connectedCallback(this, _class, template);
         }
         disconnectedCallback() {
           if (this.disconnected) this.disconnected();
-        }
-        _created() {
-          PubSubLoader(isWindow());
-          this.fireEvent = fireEvent.bind(this);
-          this.toJsProp = toJsProp.bind(this);
-          this.loadScript = loadScript.bind(this);
-          base.handleProperties(this, _class.properties);
-          base.handleObservers(this, _class.observers, _class.globalObservers);
-          base.ready(this);
-          this.registered = true;
         }
       };
       customElements.define(name, klass);
     } else if (supportsCustomElementsV0) {
       klass = document.registerElement(name, class extends _class {
         createdCallback() {
-          if (!supportsShadowDOMV1) {
-            ShadyCSS.styleElement(this);
-          }
-          if (!this.registered && this.created) this.created();
-          this._created();
+          base.constructorCallback(this, hasWindow);
         }
         attachedCallback() {
-          base.handleShadowRoot({ target: this, template: template });
-          if (this.connected) this.connected();
+          base.connectedCallback(this, _class, template);
         }
         detachedCallback() {
           if (this.disconnected) this.disconnected();
-        }
-        _created() {
-          PubSubLoader(isWindow());
-          this.fireEvent = fireEvent.bind(this);
-          this.toJsProp = toJsProp.bind(this);
-          this.loadScript = loadScript.bind(this);
-          base.handleProperties(this, _class.properties);
-          base.handleObservers(this, _class.observers, _class.globalObservers);
-          base.ready(this);
-          this.registered = true;
         }
         attachShadow() {
           return this.createShadowRoot();
