@@ -1,9 +1,5 @@
 'use strict';
 import base from './base.js';
-import fireEvent from './internals/fire-event.js';
-import toJsProp from './internals/to-js-prop.js';
-import loadScript from './internals/load-script.js';
-import PubSubLoader from './internals/pub-sub-loader.js';
 const supportsCustomElementsV1 = 'customElements' in window;
 const supportsCustomElementsV0 = 'registerElement' in document;
 const supportsShadowDOMV1 = !!HTMLElement.prototype.attachShadow;
@@ -15,6 +11,8 @@ const isWindow = () => {
     return false;
   }
 };
+
+const hasWindow = isWindow();
 
 /**
  *
@@ -32,7 +30,7 @@ export default _class => {
   let name = _class.is || upperToHyphen(_class.name);
 
   // Setup properties & observers
-  if (isWindow()) {
+  if (hasWindow) {
     const template = base.setupTemplate({
       name: name,
       shady: !supportsShadowDOMV1
@@ -42,65 +40,26 @@ export default _class => {
       klass = class extends _class {
         constructor() {
           super();
-          if (!supportsShadowDOMV1) {
-            ShadyCSS.styleElement(this)
-          }
-          if (!this.registered && this.created) this.created();
-          this._created();
+          base.constructorCallback(this, hasWindow);
         }
         connectedCallback() {
-          base.handleShadowRoot({target: this, template: template});
-          if (this.connected) this.connected();
+          base.connectedCallback(this, _class, template);
         }
         disconnectedCallback() {
           if (this.disconnected) this.disconnected();
-        }
-        _created() {
-          PubSubLoader(isWindow());
-          this.fireEvent = fireEvent.bind(this);
-          this.toJsProp = toJsProp.bind(this);
-          this.loadScript = loadScript.bind(this);
-
-          base.handleProperties(this, _class.properties);
-          base.handleObservers(this, _class.observers, _class.globalObservers);
-
-          // notify everything is ready
-          base.ready(this);
-
-          // let backed know the element is registered
-          this.registered = true;
         }
       }
       customElements.define(name, klass);
     } else if (supportsCustomElementsV0) {
       klass = document.registerElement(name, class extends _class {
         createdCallback() {
-          if (!supportsShadowDOMV1) {
-            ShadyCSS.styleElement(this)
-          }
-          if (!this.registered && this.created) this.created();
-          this._created();
+          base.constructorCallback(this, hasWindow);
         }
         attachedCallback() {
-          base.handleShadowRoot({target: this, template: template});
-          if (this.connected) this.connected();
+          base.connectedCallback(this, _class, template);
         }
         detachedCallback() {
           if (this.disconnected) this.disconnected();
-        }
-        _created() {
-          PubSubLoader(isWindow());
-          this.fireEvent = fireEvent.bind(this);
-          this.toJsProp = toJsProp.bind(this);
-          this.loadScript = loadScript.bind(this);
-
-          base.handleProperties(this, _class.properties);
-          base.handleObservers(this, _class.observers, _class.globalObservers);
-
-          // notify everything is ready
-          base.ready(this);
-          // let backed know the element is registered
-          this.registered = true;
         }
         attachShadow() {
           // TODO: feature detect shadowDOM for V1

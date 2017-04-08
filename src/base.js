@@ -1,4 +1,12 @@
 'use strict';
+import fireEvent from './internals/fire-event.js';
+import toJsProp from './internals/to-js-prop.js';
+import loadScript from './internals/load-script.js';
+import PubSubLoader from './internals/pub-sub-loader.js';
+
+const shouldShim = () => {
+  return /Edge/.test(navigator.userAgent) || /Firefox/.test(navigator.userAgent);
+}
 
 const setupTemplate = ({ name: name, shady: shady }) => {
   try {
@@ -21,6 +29,22 @@ const handleShadowRoot = ({ target: target, template: template }) => {
     if (template) {
       target.shadowRoot.appendChild(
         document.importNode(template.content, true));
+
+        if (shouldShim()) {
+          const styles = target.shadowRoot.querySelectorAll('style');
+          let _shimmed;
+          if (styles[0]) {
+            _shimmed = document.createElement('style');
+            target.shadowRoot.insertBefore(_shimmed, target.shadowRoot.firstChild);
+          }
+          for (let style of styles) {
+            _shimmed.innerHTML += style.innerHTML
+              .replace(/:host\b/gm, target.localName)
+              .replace(/::content\b/gm, '');
+
+            target.shadowRoot.removeChild(style);
+          }
+        }
     }
   }
 }
@@ -142,6 +166,34 @@ const ready = target => {
   });
 }
 
+const constructorCallback = (target=HTMLElement, hasWindow=false) => {
+  PubSubLoader(hasWindow);
+
+  if (!supportsShadowDOMV1) {
+    ShadyCSS.styleElement(target)
+  }
+
+  target.fireEvent = fireEvent.bind(target);
+  target.toJsProp = toJsProp.bind(target);
+  target.loadScript = loadScript.bind(target);
+
+  // let backed know the element is registered
+  target.registered = true;
+
+  if (!target.registered && target.created) target.created();
+}
+
+const connectedCallback = (target=HTMLElement, klass=Function, template=null) => {
+  handleShadowRoot({target: target, template: template});
+  if (target.connected) target.connected();
+  // setup properties
+  handleProperties(target, klass.properties);
+  // setup properties
+  handleObservers(target, klass.observers, klass.globalObservers);
+  // notify everything is ready
+  ready(target);
+}
+
 export default {
   setupTemplate: setupTemplate.bind(this),
   handleShadowRoot: handleShadowRoot.bind(this),
@@ -149,5 +201,7 @@ export default {
   handlePropertyObserver: handlePropertyObserver.bind(this),
   handleObservers: handleObservers.bind(this),
   setupObserver: setupObserver.bind(this),
-  ready: ready.bind(this)
+  ready: ready.bind(this),
+  connectedCallback: connectedCallback.bind(this),
+  constructorCallback: constructorCallback.bind(this)
 }
