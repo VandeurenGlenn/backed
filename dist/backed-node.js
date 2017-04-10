@@ -283,8 +283,9 @@ var ready = function ready(target) {
 var constructorCallback = function constructorCallback() {
   var target = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : HTMLElement;
   var hasWindow = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+  var shady = arguments[2];
   PubSubLoader(hasWindow);
-  if (!supportsShadowDOMV1) {
+  if (shady) {
     ShadyCSS.styleElement(target);
   }
   target.fireEvent = fireEvent.bind(target);
@@ -317,7 +318,7 @@ var base = {
 
 var supportsCustomElementsV1 = 'customElements' in window;
 var supportsCustomElementsV0 = 'registerElement' in document;
-var supportsShadowDOMV1$1 = !!HTMLElement.prototype.attachShadow;
+var supportsShadowDOMV1 = !!HTMLElement.prototype.attachShadow;
 var isWindow = function isWindow() {
   try {
     return window;
@@ -335,7 +336,7 @@ var backed = (function (_class) {
   if (hasWindow) {
     var template = base.setupTemplate({
       name: name,
-      shady: !supportsShadowDOMV1$1
+      shady: !supportsShadowDOMV1
     });
     if (supportsCustomElementsV1) {
       klass = function (_class2) {
@@ -343,7 +344,7 @@ var backed = (function (_class) {
         function klass() {
           babelHelpers.classCallCheck(this, klass);
           var _this = babelHelpers.possibleConstructorReturn(this, (klass.__proto__ || Object.getPrototypeOf(klass)).call(this));
-          base.constructorCallback(_this, hasWindow);
+          base.constructorCallback(_this, hasWindow, !supportsShadowDOMV1);
           return _this;
         }
         babelHelpers.createClass(klass, [{
@@ -370,7 +371,7 @@ var backed = (function (_class) {
         babelHelpers.createClass(_class3, [{
           key: 'createdCallback',
           value: function createdCallback() {
-            base.constructorCallback(this, hasWindow);
+            base.constructorCallback(this, hasWindow, !supportsShadowDOMV1);
           }
         }, {
           key: 'attachedCallback',

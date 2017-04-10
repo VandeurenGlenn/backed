@@ -186,9 +186,9 @@ const ready = target => {
     if (target.ready) target.ready();
   });
 };
-const constructorCallback = (target = HTMLElement, hasWindow = false) => {
+const constructorCallback = (target = HTMLElement, hasWindow = false, shady) => {
   PubSubLoader(hasWindow);
-  if (!supportsShadowDOMV1) {
+  if (shady) {
     ShadyCSS.styleElement(target);
   }
   target.fireEvent = fireEvent.bind(target);
@@ -218,7 +218,7 @@ var base = {
 
 const supportsCustomElementsV1 = 'customElements' in window;
 const supportsCustomElementsV0 = 'registerElement' in document;
-const supportsShadowDOMV1$1 = !!HTMLElement.prototype.attachShadow;
+const supportsShadowDOMV1 = !!HTMLElement.prototype.attachShadow;
 const isWindow = () => {
   try {
     return window;
@@ -236,13 +236,13 @@ var backed = (_class => {
   if (hasWindow) {
     const template = base.setupTemplate({
       name: name,
-      shady: !supportsShadowDOMV1$1
+      shady: !supportsShadowDOMV1
     });
     if (supportsCustomElementsV1) {
       klass = class extends _class {
         constructor() {
           super();
-          base.constructorCallback(this, hasWindow);
+          base.constructorCallback(this, hasWindow, !supportsShadowDOMV1);
         }
         connectedCallback() {
           base.connectedCallback(this, _class, template);
@@ -255,7 +255,7 @@ var backed = (_class => {
     } else if (supportsCustomElementsV0) {
       klass = document.registerElement(name, class extends _class {
         createdCallback() {
-          base.constructorCallback(this, hasWindow);
+          base.constructorCallback(this, hasWindow, !supportsShadowDOMV1);
         }
         attachedCallback() {
           base.connectedCallback(this, _class, template);
