@@ -40,7 +40,7 @@ export default _class => {
       klass = class extends _class {
         constructor() {
           super();
-          base.constructorCallback(this, hasWindow);
+          base.constructorCallback(this, hasWindow, !supportsShadowDOMV1);
         }
         connectedCallback() {
           base.connectedCallback(this, _class, template);
@@ -53,7 +53,7 @@ export default _class => {
     } else if (supportsCustomElementsV0) {
       klass = document.registerElement(name, class extends _class {
         createdCallback() {
-          base.constructorCallback(this, hasWindow);
+          base.constructorCallback(this, hasWindow, !supportsShadowDOMV1);
         }
         attachedCallback() {
           base.connectedCallback(this, _class, template);

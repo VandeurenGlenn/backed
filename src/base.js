@@ -166,10 +166,10 @@ const ready = target => {
   });
 }
 
-const constructorCallback = (target=HTMLElement, hasWindow=false) => {
+const constructorCallback = (target=HTMLElement, hasWindow=false, shady) => {
   PubSubLoader(hasWindow);
 
-  if (!supportsShadowDOMV1) {
+  if (shady) {
     ShadyCSS.styleElement(target)
   }
 
