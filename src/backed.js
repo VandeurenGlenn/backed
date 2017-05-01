@@ -51,7 +51,7 @@ export default _class => {
         }
       }
       if (registeredElements.indexOf(name) === -1) {
-        registerElements.push(name);
+        registeredElements.push(name);
         customElements.define(name, klass);
       }
     } else if (supportsCustomElementsV0) {
@@ -71,7 +71,7 @@ export default _class => {
         }
       }
       if (registeredElements.indexOf(name) === -1) {
-        registerElements.push(name);
+        registeredElements.push(name);
         document.registerElement(name, klass)
       }
     } else {
