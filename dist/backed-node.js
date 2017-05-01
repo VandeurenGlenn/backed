@@ -319,6 +319,7 @@ var base = {
 var supportsCustomElementsV1 = 'customElements' in window;
 var supportsCustomElementsV0 = 'registerElement' in document;
 var supportsShadowDOMV1 = !!HTMLElement.prototype.attachShadow;
+var registeredElements = [];
 var isWindow = function isWindow() {
   try {
     return window;
@@ -360,15 +361,18 @@ var backed = (function (_class) {
         }]);
         return klass;
       }(_class);
-      customElements.define(name, klass);
+      if (registeredElements.indexOf(name) === -1) {
+        registerElements.push(name);
+        customElements.define(name, klass);
+      }
     } else if (supportsCustomElementsV0) {
-      klass = document.registerElement(name, function (_class4) {
-        babelHelpers.inherits(_class3, _class4);
-        function _class3() {
-          babelHelpers.classCallCheck(this, _class3);
-          return babelHelpers.possibleConstructorReturn(this, (_class3.__proto__ || Object.getPrototypeOf(_class3)).apply(this, arguments));
+      klass = function (_class3) {
+        babelHelpers.inherits(klass, _class3);
+        function klass() {
+          babelHelpers.classCallCheck(this, klass);
+          return babelHelpers.possibleConstructorReturn(this, (klass.__proto__ || Object.getPrototypeOf(klass)).apply(this, arguments));
         }
-        babelHelpers.createClass(_class3, [{
+        babelHelpers.createClass(klass, [{
           key: 'createdCallback',
           value: function createdCallback() {
             base.constructorCallback(this, hasWindow, !supportsShadowDOMV1);
@@ -389,8 +393,12 @@ var backed = (function (_class) {
             return this.createShadowRoot();
           }
         }]);
-        return _class3;
-      }(_class));
+        return klass;
+      }(_class);
+      if (registeredElements.indexOf(name) === -1) {
+        registerElements.push(name);
+        document.registerElement(name, klass);
+      }
     } else {
       console.warn('classes::unsupported');
     }
