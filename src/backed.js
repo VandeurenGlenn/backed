@@ -3,6 +3,7 @@ import base from './base.js';
 const supportsCustomElementsV1 = 'customElements' in window;
 const supportsCustomElementsV0 = 'registerElement' in document;
 const supportsShadowDOMV1 = !!HTMLElement.prototype.attachShadow;
+let registeredElements = [];
 
 const isWindow = () => {
   try {
@@ -49,9 +50,12 @@ export default _class => {
           if (this.disconnected) this.disconnected();
         }
       }
-      customElements.define(name, klass);
+      if (registeredElements.indexOf(name) === -1) {
+        registerElements.push(name);
+        customElements.define(name, klass);
+      }
     } else if (supportsCustomElementsV0) {
-      klass = document.registerElement(name, class extends _class {
+      klass = class extends _class {
         createdCallback() {
           base.constructorCallback(this, hasWindow, !supportsShadowDOMV1);
         }
@@ -65,7 +69,11 @@ export default _class => {
           // TODO: feature detect shadowDOM for V1
           return this.createShadowRoot();
         }
-      })
+      }
+      if (registeredElements.indexOf(name) === -1) {
+        registerElements.push(name);
+        document.registerElement(name, klass)
+      }
     } else {
       console.warn('classes::unsupported');
     }
