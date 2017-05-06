@@ -142,7 +142,11 @@ const setupObserver = (obj, property, fn, opts={
         data.instance = this;
         PubSub.publish(`global.${property}`, data);
       } else {
-        this[fn](data);
+        try {
+          this[fn](data);
+        } catch (error) {
+          console.warn(`observer undefined::${fn} is not a function`);
+        }
       }
     },
     get() {
