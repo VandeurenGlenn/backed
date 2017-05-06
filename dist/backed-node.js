@@ -258,7 +258,11 @@ var setupObserver = function setupObserver(obj, property, fn) {
         data.instance = this;
         PubSub.publish('global.' + property, data);
       } else {
-        this[fn](data);
+        try {
+          this[fn](data);
+        } catch (error) {
+          console.warn('observer undefined::' + fn + ' is not a function');
+        }
       }
     },
     get: function get() {
