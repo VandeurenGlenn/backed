@@ -295,8 +295,8 @@ var constructorCallback = function constructorCallback() {
   target.fireEvent = fireEvent.bind(target);
   target.toJsProp = toJsProp.bind(target);
   target.loadScript = loadScript.bind(target);
-  target.registered = true;
   if (!target.registered && target.created) target.created();
+  target.registered = true;
 };
 var connectedCallback = function connectedCallback() {
   var target = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : HTMLElement;

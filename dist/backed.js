@@ -198,8 +198,8 @@ const constructorCallback = (target = HTMLElement, hasWindow = false, shady) => 
   target.fireEvent = fireEvent.bind(target);
   target.toJsProp = toJsProp.bind(target);
   target.loadScript = loadScript.bind(target);
-  target.registered = true;
   if (!target.registered && target.created) target.created();
+  target.registered = true;
 };
 const connectedCallback = (target = HTMLElement, klass = Function, template = null) => {
   handleShadowRoot({ target: target, template: template });
