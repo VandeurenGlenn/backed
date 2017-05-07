@@ -181,10 +181,10 @@ const constructorCallback = (target=HTMLElement, hasWindow=false, shady) => {
   target.toJsProp = toJsProp.bind(target);
   target.loadScript = loadScript.bind(target);
 
+  if (!target.registered && target.created) target.created();
+
   // let backed know the element is registered
   target.registered = true;
-
-  if (!target.registered && target.created) target.created();
 }
 
 const connectedCallback = (target=HTMLElement, klass=Function, template=null) => {
