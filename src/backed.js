@@ -78,5 +78,5 @@ export default _class => {
     // TODO: handle Commonjs (properties, observers, etc ...)
     klass = _class;
   }
-  return klass;
+  return window[_class.name] = klass;
 };
