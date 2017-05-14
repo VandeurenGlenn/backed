@@ -68,6 +68,7 @@ var PubSubLoader = (function (isWindow) {
   }
 });
 
+var registeredElements = [];
 var shouldShim = function shouldShim() {
   return (/Edge/.test(navigator.userAgent) || /Firefox/.test(navigator.userAgent)
   );
@@ -258,9 +259,9 @@ var setupObserver = function setupObserver(obj, property, fn) {
         data.instance = this;
         PubSub.publish('global.' + property, data);
       } else {
-        try {
+        if (this[fn]) {
           this[fn](data);
-        } catch (error) {
+        } else {
           console.warn('observer undefined::' + fn + ' is not a function');
         }
       }
@@ -308,6 +309,13 @@ var connectedCallback = function connectedCallback() {
   handleObservers(target, klass.observers, klass.globalObservers);
   ready(target);
 };
+var shouldRegister = function shouldRegister(name, klass) {
+  if (registeredElements.indexOf(name) === -1) {
+    registeredElements.push(name);
+    return true;
+  }
+  return false;
+};
 var base = {
   setupTemplate: setupTemplate.bind(undefined),
   handleShadowRoot: handleShadowRoot.bind(undefined),
@@ -317,13 +325,13 @@ var base = {
   setupObserver: setupObserver.bind(undefined),
   ready: ready.bind(undefined),
   connectedCallback: connectedCallback.bind(undefined),
-  constructorCallback: constructorCallback.bind(undefined)
+  constructorCallback: constructorCallback.bind(undefined),
+  shouldRegister: shouldRegister.bind(undefined)
 };
 
 var supportsCustomElementsV1 = 'customElements' in window;
 var supportsCustomElementsV0 = 'registerElement' in document;
 var supportsShadowDOMV1 = !!HTMLElement.prototype.attachShadow;
-var registeredElements = [];
 var isWindow = function isWindow() {
   try {
     return window;
@@ -365,8 +373,7 @@ var backed = (function (_class) {
         }]);
         return klass;
       }(_class);
-      if (registeredElements.indexOf(name) === -1) {
-        registeredElements.push(name);
+      if (base.shouldRegister(name, klass)) {
         customElements.define(name, klass);
       }
     } else if (supportsCustomElementsV0) {
@@ -399,8 +406,7 @@ var backed = (function (_class) {
         }]);
         return klass;
       }(_class);
-      if (registeredElements.indexOf(name) === -1) {
-        registeredElements.push(name);
+      if (base.shouldRegister(name, klass)) {
         document.registerElement(name, klass);
       }
     } else {
@@ -409,7 +415,7 @@ var backed = (function (_class) {
   } else {
     klass = _class;
   }
-  return klass;
+  return window[_class.name] = klass;
 });
 
 module.exports = backed;

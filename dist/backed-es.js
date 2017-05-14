@@ -56,6 +56,7 @@ var PubSubLoader = (isWindow => {
   }
 });
 
+const registeredElements = [];
 const shouldShim = () => {
   return (/Edge/.test(navigator.userAgent) || /Firefox/.test(navigator.userAgent)
   );
@@ -163,9 +164,9 @@ const setupObserver = (obj, property, fn, opts = {
         data.instance = this;
         PubSub.publish(`global.${property}`, data);
       } else {
-        try {
+        if (this[fn]) {
           this[fn](data);
-        } catch (error) {
+        } else {
           console.warn(`observer undefined::${fn} is not a function`);
         }
       }
@@ -205,6 +206,13 @@ const connectedCallback = (target = HTMLElement, klass = Function, template = nu
   handleObservers(target, klass.observers, klass.globalObservers);
   ready(target);
 };
+const shouldRegister = (name, klass) => {
+  if (registeredElements.indexOf(name) === -1) {
+    registeredElements.push(name);
+    return true;
+  }
+  return false;
+};
 var base = {
   setupTemplate: setupTemplate.bind(undefined),
   handleShadowRoot: handleShadowRoot.bind(undefined),
@@ -214,13 +222,13 @@ var base = {
   setupObserver: setupObserver.bind(undefined),
   ready: ready.bind(undefined),
   connectedCallback: connectedCallback.bind(undefined),
-  constructorCallback: constructorCallback.bind(undefined)
+  constructorCallback: constructorCallback.bind(undefined),
+  shouldRegister: shouldRegister.bind(undefined)
 };
 
 const supportsCustomElementsV1 = 'customElements' in window;
 const supportsCustomElementsV0 = 'registerElement' in document;
 const supportsShadowDOMV1 = !!HTMLElement.prototype.attachShadow;
-let registeredElements = [];
 const isWindow = () => {
   try {
     return window;
@@ -253,8 +261,7 @@ var backed = (_class => {
           if (this.disconnected) this.disconnected();
         }
       };
-      if (registeredElements.indexOf(name) === -1) {
-        registeredElements.push(name);
+      if (base.shouldRegister(name, klass)) {
         customElements.define(name, klass);
       }
     } else if (supportsCustomElementsV0) {
@@ -272,8 +279,7 @@ var backed = (_class => {
           return this.createShadowRoot();
         }
       };
-      if (registeredElements.indexOf(name) === -1) {
-        registeredElements.push(name);
+      if (base.shouldRegister(name, klass)) {
         document.registerElement(name, klass);
       }
     } else {
@@ -282,7 +288,7 @@ var backed = (_class => {
   } else {
     klass = _class;
   }
-  return klass;
+  return window[_class.name] = klass;
 });
 
 export default backed;
