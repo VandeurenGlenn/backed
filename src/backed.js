@@ -3,7 +3,6 @@ import base from './base.js';
 const supportsCustomElementsV1 = 'customElements' in window;
 const supportsCustomElementsV0 = 'registerElement' in document;
 const supportsShadowDOMV1 = !!HTMLElement.prototype.attachShadow;
-let registeredElements = [];
 
 const isWindow = () => {
   try {
@@ -50,10 +49,9 @@ export default _class => {
           if (this.disconnected) this.disconnected();
         }
       }
-      if (registeredElements.indexOf(name) === -1) {
-        registeredElements.push(name);
+      if (base.shouldRegister(name, klass)) {
         customElements.define(name, klass);
-      }
+      };
     } else if (supportsCustomElementsV0) {
       klass = class extends _class {
         createdCallback() {
@@ -70,10 +68,9 @@ export default _class => {
           return this.createShadowRoot();
         }
       }
-      if (registeredElements.indexOf(name) === -1) {
-        registeredElements.push(name);
+      if (base.shouldRegister(name, klass)) {
         document.registerElement(name, klass)
-      }
+      };
     } else {
       console.warn('classes::unsupported');
     }

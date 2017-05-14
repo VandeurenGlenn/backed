@@ -4,6 +4,8 @@ import toJsProp from './internals/to-js-prop.js';
 import loadScript from './internals/load-script.js';
 import PubSubLoader from './internals/pub-sub-loader.js';
 
+const registeredElements = [];
+
 const shouldShim = () => {
   return /Edge/.test(navigator.userAgent) || /Firefox/.test(navigator.userAgent);
 }
@@ -198,6 +200,14 @@ const connectedCallback = (target=HTMLElement, klass=Function, template=null) =>
   ready(target);
 }
 
+const shouldRegister = (name, klass) => {
+  if (registeredElements.indexOf(name) === -1) {
+    registeredElements.push(name);
+    return true;
+  }
+  return false;
+}
+
 export default {
   setupTemplate: setupTemplate.bind(this),
   handleShadowRoot: handleShadowRoot.bind(this),
@@ -207,5 +217,6 @@ export default {
   setupObserver: setupObserver.bind(this),
   ready: ready.bind(this),
   connectedCallback: connectedCallback.bind(this),
-  constructorCallback: constructorCallback.bind(this)
+  constructorCallback: constructorCallback.bind(this),
+  shouldRegister: shouldRegister.bind(this)
 }
