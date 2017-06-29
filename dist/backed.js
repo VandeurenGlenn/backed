@@ -196,9 +196,9 @@ const constructorCallback = (target = HTMLElement, hasWindow = false, shady) => 
   if (shady) {
     ShadyCSS.styleElement(target);
   }
-  target.fireEvent = fireEvent.bind(target);
-  target.toJsProp = toJsProp.bind(target);
-  target.loadScript = loadScript.bind(target);
+  target.fireEvent = target.fireEvent || fireEvent.bind(target);
+  target.toJsProp = target.toJsProp || toJsProp.bind(target);
+  target.loadScript = target.loadScript || loadScript.bind(target);
   if (!target.registered && target.created) target.created();
   target.registered = true;
 };
