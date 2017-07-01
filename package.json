@@ -1,6 +1,6 @@
 {
   "name": "backed",
-  "version": "0.4.1",
+  "version": "0.5.0-alpha",
   "description": "Small web framework for quick app & component development",
   "main": "dist/backed-node.js",
   "scripts": {
