@@ -280,6 +280,45 @@ var handleObservers = function handleObservers(target) {
   }
   forObservers(target, observers);
 };
+var handleListeners = function handleListeners(target) {
+  var attributes = target.attributes;
+  var _iteratorNormalCompletion5 = true;
+  var _didIteratorError5 = false;
+  var _iteratorError5 = undefined;
+  try {
+    for (var _iterator5 = attributes[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+      var attribute = _step5.value;
+      if (String(attribute.name).includes('on-')) {
+        (function () {
+          var fn = attribute.value;
+          var name = attribute.name.replace('on-', '');
+          target.addEventListener(String(name), function (event) {
+            target = event.path[0];
+            while (!target.host) {
+              target = target.parentNode;
+            }
+            if (target.host[fn]) {
+              target.host[fn]();
+            }
+          });
+        })();
+      }
+    }
+  } catch (err) {
+    _didIteratorError5 = true;
+    _iteratorError5 = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion5 && _iterator5.return) {
+        _iterator5.return();
+      }
+    } finally {
+      if (_didIteratorError5) {
+        throw _iteratorError5;
+      }
+    }
+  }
+};
 var ready = function ready(target) {
   requestAnimationFrame(function () {
     if (target.ready) target.ready();
@@ -307,6 +346,7 @@ var connectedCallback = function connectedCallback() {
   if (target.connected) target.connected();
   handleProperties(target, klass.properties);
   handleObservers(target, klass.observers, klass.globalObservers);
+  handleListeners(target);
   ready(target);
 };
 var shouldRegister = function shouldRegister(name, klass) {
