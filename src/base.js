@@ -166,6 +166,25 @@ const handleObservers = (target, observers=[], globalObservers=[]) => {
   forObservers(target, observers);
 }
 
+const handleListeners = target => {
+  const attributes = target.attributes
+  for (const attribute of attributes) {
+    if (String(attribute.name).includes('on-')) {
+      const fn = attribute.value;
+      const name = attribute.name.replace('on-', '');
+      target.addEventListener(String(name), event => {
+        target = event.path[0];
+        while (!target.host) {
+          target = target.parentNode;
+        }
+        if (target.host[fn]) {
+          target.host[fn]();
+        }
+      });
+    }
+  }
+}
+
 const ready = target => {
   requestAnimationFrame(() => {
     if (target.ready) target.ready();
@@ -196,6 +215,8 @@ const connectedCallback = (target=HTMLElement, klass=Function, template=null) =>
   handleProperties(target, klass.properties);
   // setup properties
   handleObservers(target, klass.observers, klass.globalObservers);
+  // setup listeners
+  handleListeners(target)
   // notify everything is ready
   ready(target);
 }
