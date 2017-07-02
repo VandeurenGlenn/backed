@@ -206,7 +206,7 @@ const ready = target => {
     if (target.ready) target.ready();
   });
 };
-const constructorCallback = (target = HTMLElement, hasWindow = false, shady) => {
+const constructorCallback = (target = HTMLElement, klass = Function, template = null, hasWindow = false, shady) => {
   PubSubLoader(hasWindow);
   if (shady) {
     ShadyCSS.styleElement(target);
@@ -214,13 +214,13 @@ const constructorCallback = (target = HTMLElement, hasWindow = false, shady) => 
   target.fireEvent = target.fireEvent || fireEvent.bind(target);
   target.toJsProp = target.toJsProp || toJsProp.bind(target);
   target.loadScript = target.loadScript || loadScript.bind(target);
+  handleShadowRoot({ target: target, template: template });
+  handleProperties(target, klass.properties);
   if (!target.registered && target.created) target.created();
   target.registered = true;
 };
 const connectedCallback = (target = HTMLElement, klass = Function, template = null) => {
-  handleShadowRoot({ target: target, template: template });
   if (target.connected) target.connected();
-  handleProperties(target, klass.properties);
   handleObservers(target, klass.observers, klass.globalObservers);
   handleListeners(target);
   ready(target);
@@ -271,7 +271,7 @@ var backed = (_class => {
       klass = class extends _class {
         constructor() {
           super();
-          base.constructorCallback(this, hasWindow, !supportsShadowDOMV1);
+          base.constructorCallback(this, _class, template, hasWindow, !supportsShadowDOMV1);
         }
         connectedCallback() {
           base.connectedCallback(this, _class, template);
@@ -286,7 +286,7 @@ var backed = (_class => {
     } else if (supportsCustomElementsV0) {
       klass = class extends _class {
         createdCallback() {
-          base.constructorCallback(this, hasWindow, !supportsShadowDOMV1);
+          base.constructorCallback(this, _class, template, hasWindow, !supportsShadowDOMV1);
         }
         attachedCallback() {
           base.connectedCallback(this, _class, template);

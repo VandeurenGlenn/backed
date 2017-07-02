@@ -326,8 +326,10 @@ var ready = function ready(target) {
 };
 var constructorCallback = function constructorCallback() {
   var target = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : HTMLElement;
-  var hasWindow = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-  var shady = arguments[2];
+  var klass = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : Function;
+  var template = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+  var hasWindow = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+  var shady = arguments[4];
   PubSubLoader(hasWindow);
   if (shady) {
     ShadyCSS.styleElement(target);
@@ -335,6 +337,8 @@ var constructorCallback = function constructorCallback() {
   target.fireEvent = target.fireEvent || fireEvent.bind(target);
   target.toJsProp = target.toJsProp || toJsProp.bind(target);
   target.loadScript = target.loadScript || loadScript.bind(target);
+  handleShadowRoot({ target: target, template: template });
+  handleProperties(target, klass.properties);
   if (!target.registered && target.created) target.created();
   target.registered = true;
 };
@@ -342,9 +346,7 @@ var connectedCallback = function connectedCallback() {
   var target = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : HTMLElement;
   var klass = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : Function;
   var template = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-  handleShadowRoot({ target: target, template: template });
   if (target.connected) target.connected();
-  handleProperties(target, klass.properties);
   handleObservers(target, klass.observers, klass.globalObservers);
   handleListeners(target);
   ready(target);
@@ -397,7 +399,7 @@ var backed = (function (_class) {
         function klass() {
           babelHelpers.classCallCheck(this, klass);
           var _this = babelHelpers.possibleConstructorReturn(this, (klass.__proto__ || Object.getPrototypeOf(klass)).call(this));
-          base.constructorCallback(_this, hasWindow, !supportsShadowDOMV1);
+          base.constructorCallback(_this, _class, template, hasWindow, !supportsShadowDOMV1);
           return _this;
         }
         babelHelpers.createClass(klass, [{
@@ -426,7 +428,7 @@ var backed = (function (_class) {
         babelHelpers.createClass(klass, [{
           key: 'createdCallback',
           value: function createdCallback() {
-            base.constructorCallback(this, hasWindow, !supportsShadowDOMV1);
+            base.constructorCallback(this, _class, template, hasWindow, !supportsShadowDOMV1);
           }
         }, {
           key: 'attachedCallback',
