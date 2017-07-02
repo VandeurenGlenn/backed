@@ -191,7 +191,7 @@ const ready = target => {
   });
 }
 
-const constructorCallback = (target=HTMLElement, hasWindow=false, shady) => {
+const constructorCallback = (target=HTMLElement, klass=Function, template=null, hasWindow=false, shady) => {
   PubSubLoader(hasWindow);
 
   if (shady) {
@@ -202,6 +202,11 @@ const constructorCallback = (target=HTMLElement, hasWindow=false, shady) => {
   target.toJsProp = target.toJsProp || toJsProp.bind(target);
   target.loadScript = target.loadScript || loadScript.bind(target);
 
+  // setup shadowRoot
+  handleShadowRoot({target: target, template: template});
+  // setup properties
+  handleProperties(target, klass.properties);
+
   if (!target.registered && target.created) target.created();
 
   // let backed know the element is registered
@@ -209,10 +214,7 @@ const constructorCallback = (target=HTMLElement, hasWindow=false, shady) => {
 }
 
 const connectedCallback = (target=HTMLElement, klass=Function, template=null) => {
-  handleShadowRoot({target: target, template: template});
   if (target.connected) target.connected();
-  // setup properties
-  handleProperties(target, klass.properties);
   // setup properties
   handleObservers(target, klass.observers, klass.globalObservers);
   // setup listeners
