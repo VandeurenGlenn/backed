@@ -198,7 +198,7 @@ const handleListeners = target => {
           target = target.parentNode;
         }
         if (target.host[fn]) {
-          target.host[fn]();
+          target.host[fn](event);
         }
       });
     }
