@@ -4,8 +4,6 @@ const supportsCustomElementsV1 = 'customElements' in window;
 const supportsCustomElementsV0 = 'registerElement' in document;
 const supportsShadowDOMV1 = !!HTMLElement.prototype.attachShadow;
 
-window.dispatchEvent(new CustomEvent('backed-ready'));
-
 const isWindow = () => {
   try {
     return window;
@@ -82,3 +80,5 @@ export default _class => {
   }
   return window[_class.name] = klass;
 };
+
+window.dispatchEvent(new CustomEvent('backed-ready'));
