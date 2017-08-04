@@ -22,8 +22,6 @@ hash=`git log -1 --pretty=%P`
 
 git tag $PACKAGE_VERSION
 
-git reset $hash
-
 # change username back
 git config --global user.name "$username" --replace-all
 
