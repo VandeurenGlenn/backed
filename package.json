@@ -4,7 +4,7 @@
   "description": "Small web framework for quick app & component development",
   "main": "dist/backed-node.js",
   "scripts": {
-    "release": "backed -b && sh release.sh",
+    "release": "sh release.sh",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
