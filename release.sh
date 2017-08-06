@@ -15,7 +15,7 @@ PACKAGE_VERSION=$(cat package.json \
 
 echo $PACKAGE_VERSION
 git add package.json
-git add dist/**
+git add dist/** --force
 git commit -m ":trollface: Version: $PACKAGE_VERSION"
 
 hash=`git log -1 --pretty=%P`
