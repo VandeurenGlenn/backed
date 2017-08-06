@@ -15,12 +15,11 @@ PACKAGE_VERSION=$(cat package.json \
 
 echo $PACKAGE_VERSION
 git add package.json
-git add dist/** --force
 git commit -m ":trollface: Version: $PACKAGE_VERSION"
 
-hash=`git log -1 --pretty=%P`
-
 git tag $PACKAGE_VERSION
+git checkout $PACKAGE_VERSION
+git add dist/** --force
 
 # change username back
 git config --global user.name "$username" --replace-all
@@ -29,3 +28,6 @@ git push origin $PACKAGE_VERSION
 
 echo removing release files
 rm -rf dist
+
+echo going back to master
+git checkout master
