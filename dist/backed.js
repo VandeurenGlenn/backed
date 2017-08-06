@@ -59,7 +59,7 @@ var PubSubLoader = (isWindow => {
   }
 });
 
-const registeredElements = [];
+window.registeredElements = window.registeredElements || [];
 const shouldShim = () => {
   return (/Edge/.test(navigator.userAgent) || /Firefox/.test(navigator.userAgent)
   );
@@ -229,8 +229,8 @@ const connectedCallback = (target = HTMLElement, klass = Function, template = nu
   ready(target);
 };
 const shouldRegister = (name, klass) => {
-  if (registeredElements.indexOf(name) === -1) {
-    registeredElements.push(name);
+  if (window.registeredElements.indexOf(name) === -1) {
+    window.registeredElements.push(name);
     return true;
   }
   return false;

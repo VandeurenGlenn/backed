@@ -68,7 +68,7 @@ var PubSubLoader = (function (isWindow) {
   }
 });
 
-var registeredElements = [];
+window.registeredElements = window.registeredElements || [];
 var shouldShim = function shouldShim() {
   return (/Edge/.test(navigator.userAgent) || /Firefox/.test(navigator.userAgent)
   );
@@ -352,8 +352,8 @@ var connectedCallback = function connectedCallback() {
   ready(target);
 };
 var shouldRegister = function shouldRegister(name, klass) {
-  if (registeredElements.indexOf(name) === -1) {
-    registeredElements.push(name);
+  if (window.registeredElements.indexOf(name) === -1) {
+    window.registeredElements.push(name);
     return true;
   }
   return false;
