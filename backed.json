@@ -1,5 +1,10 @@
 {
   "bundles": [{
+    "src": "src/poly-loader.js",
+    "dest": "dist/poly-loader.js",
+    "moduleName": "polyLoader",
+    "format": "iife"
+  }, {
     "src": "src/backed.js",
     "dest": "dist/backed.js",
     "moduleName": "Backed",

@@ -1,32 +1,35 @@
 'use strict';
 import loadScript from './internals/load-script';
-const supportsCustomElementsV1 = 'customElements' in window;
-const supportsShadowDOMV1 = !!HTMLElement.prototype.attachShadow;
 
-const imported = {};
-
-const bowerMinUrl = (name, main) => {
+const bowerMinUrl = (name, main, root) => {
   const url = main ? `${name}/${main}` : `${name}/${name}`;
-  return `bower_components/${url}.min.js`;
+  return `${root}/${url}.min.js`;
 }
 
-export default () => {
+const ensureArray = array => {
+  if (Array.isArray(array)) {
+    return array;
+  }
+  return [...array];
+}
+
+/**
+ * @module polyLoader
+ * @param {string} name package name (folder)
+ * @param {string} main script to use
+ * @param {string} root location of your components
+ */
+export default (fills, root='bower_components') => {
   return new Promise((resolve, reject) => {
-    const promises = [];
-    if (!supportsShadowDOMV1) {
-      promises.push(loadScript(bowerMinUrl('shadydom')))
-      promises.push(
-        loadScript(bowerMinUrl('shadycss', 'custom-style-interface')
-      ));
-    }
-    if (promises.length > 0) {
-      Promise.all(promises).then(() => {
-        resolve();
-      }).catch(error => {
-        reject(error);
-      });
-    } else {
+    fills = ensureArray(fills);
+    fills = fills.map(fill => {
+      if (fill.name === 'shadycss' && !fill.main) {
+        fill.main = 'custom-style-interface';
+      }
+      return loadScript(bowerMinUrl(name, main, root));
+    });
+    promises.all(fills).then(() => {
       resolve();
-    }
+    }).catch(error => reject(error));
   });
 }
