@@ -371,9 +371,6 @@ var base = {
   shouldRegister: shouldRegister.bind(undefined)
 };
 
-var supportsCustomElementsV1 = 'customElements' in window;
-var supportsCustomElementsV0 = 'registerElement' in document;
-var supportsShadowDOMV1 = !!HTMLElement.prototype.attachShadow;
 var isWindow = function isWindow() {
   try {
     return window;
@@ -389,6 +386,8 @@ var backed = (function (_class) {
   var klass = void 0;
   var name = _class.is || upperToHyphen(_class.name);
   if (hasWindow) {
+    var supportsCustomElementsV1 = 'customElements' in window;
+    var supportsShadowDOMV1 = !!HTMLElement.prototype.attachShadow;
     var template = base.setupTemplate({
       name: name,
       shady: !supportsShadowDOMV1
@@ -418,41 +417,8 @@ var backed = (function (_class) {
       if (base.shouldRegister(name, klass)) {
         customElements.define(name, klass);
       }
-    } else if (supportsCustomElementsV0) {
-      klass = function (_class3) {
-        babelHelpers.inherits(klass, _class3);
-        function klass() {
-          babelHelpers.classCallCheck(this, klass);
-          return babelHelpers.possibleConstructorReturn(this, (klass.__proto__ || Object.getPrototypeOf(klass)).apply(this, arguments));
-        }
-        babelHelpers.createClass(klass, [{
-          key: 'createdCallback',
-          value: function createdCallback() {
-            base.constructorCallback(this, _class, template, hasWindow, !supportsShadowDOMV1);
-          }
-        }, {
-          key: 'attachedCallback',
-          value: function attachedCallback() {
-            base.connectedCallback(this, _class, template);
-          }
-        }, {
-          key: 'detachedCallback',
-          value: function detachedCallback() {
-            if (this.disconnected) this.disconnected();
-          }
-        }, {
-          key: 'attachShadow',
-          value: function attachShadow() {
-            return this.createShadowRoot();
-          }
-        }]);
-        return klass;
-      }(_class);
-      if (base.shouldRegister(name, klass)) {
-        document.registerElement(name, klass);
-      }
     } else {
-      console.warn('classes::unsupported');
+      console.warn('unsupported environment, failed importing polyfills for customElementsV1');
     }
   } else {
     klass = _class;
