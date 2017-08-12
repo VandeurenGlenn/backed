@@ -1,6 +1,5 @@
 'use strict';
 import loadScript from './internals/load-script';
-const supportsHTMLImports = 'import' in document.createElement('link');
 const supportsCustomElementsV1 = 'customElements' in window;
 const supportsShadowDOMV1 = !!HTMLElement.prototype.attachShadow;
 
@@ -13,12 +12,6 @@ const bowerMinUrl = (name, main) => {
 
 export default () => {
   return new Promise((resolve, reject) => {
-    if (!supportsHTMLImports) {
-      promises.push(loadScript(bowerMinUrl('html-imports')))
-    }
-    if (!supportsCustomElementsV1) {
-      promises.push(loadScript(bowerMinUrl('custom-elements')))
-    }
     if (!supportsShadowDOMV1) {
       promises.push(loadScript(bowerMinUrl('shadydom')))
       promises.push(
