@@ -57,7 +57,18 @@ export default _class => {
     }
   } else {
     // TODO: handle Commonjs (properties, observers, etc ...)
-    klass = _class;
+    klass = class extends _class {
+      constructor() {
+        super();
+        base.constructorCallback(this, _class, template, ____hasWindow____, !____ShadowDOMV1____);
+      }
+      connectedCallback() {
+        base.connectedCallback(this, _class, template);
+      }
+      disconnectedCallback() {
+        if (this.disconnected) this.disconnected();
+      }
+    };
   }
   return window[_class.name] = klass;
 };
