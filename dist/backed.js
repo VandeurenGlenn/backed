@@ -248,32 +248,32 @@ var base = {
   shouldRegister: shouldRegister.bind(undefined)
 };
 
-const isWindow = () => {
+const ____CustomElementsV1____ = 'customElements' in window;
+const ____ShadowDOMV1____ = !!HTMLElement.prototype.attachShadow;
+const ____isWindow____ = () => {
   try {
     return window;
   } catch (e) {
     return false;
   }
 };
-const hasWindow = isWindow();
+const ____hasWindow____ = ____isWindow____();
 var backed = (_class => {
   const upperToHyphen = string => {
     return string.replace(/([A-Z])/g, "-$1").toLowerCase().replace('-', '');
   };
   let klass;
   let name = _class.is || upperToHyphen(_class.name);
-  if (hasWindow) {
-    const supportsCustomElementsV1 = 'customElements' in window;
-    const supportsShadowDOMV1 = !!HTMLElement.prototype.attachShadow;
+  if (____hasWindow____) {
     const template = base.setupTemplate({
       name: name,
-      shady: !supportsShadowDOMV1
+      shady: !____ShadowDOMV1____
     });
-    if (supportsCustomElementsV1) {
+    if (____CustomElementsV1____) {
       klass = class extends _class {
         constructor() {
           super();
-          base.constructorCallback(this, _class, template, hasWindow, !supportsShadowDOMV1);
+          base.constructorCallback(this, _class, template, ____hasWindow____, !____ShadowDOMV1____);
         }
         connectedCallback() {
           base.connectedCallback(this, _class, template);
@@ -289,7 +289,18 @@ var backed = (_class => {
       console.warn('unsupported environment, failed importing polyfills for customElementsV1');
     }
   } else {
-    klass = _class;
+    klass = class extends _class {
+      constructor() {
+        super();
+        base.constructorCallback(this, _class, template, ____hasWindow____, !____ShadowDOMV1____);
+      }
+      connectedCallback() {
+        base.connectedCallback(this, _class, template);
+      }
+      disconnectedCallback() {
+        if (this.disconnected) this.disconnected();
+      }
+    };
   }
   return window[_class.name] = klass;
 });

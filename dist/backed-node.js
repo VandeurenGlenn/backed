@@ -371,40 +371,40 @@ var base = {
   shouldRegister: shouldRegister.bind(undefined)
 };
 
-var isWindow = function isWindow() {
+var ____CustomElementsV1____ = 'customElements' in window;
+var ____ShadowDOMV1____ = !!HTMLElement.prototype.attachShadow;
+var ____isWindow____ = function ____isWindow____() {
   try {
     return window;
   } catch (e) {
     return false;
   }
 };
-var hasWindow = isWindow();
+var ____hasWindow____ = ____isWindow____();
 var backed = (function (_class) {
   var upperToHyphen = function upperToHyphen(string) {
     return string.replace(/([A-Z])/g, "-$1").toLowerCase().replace('-', '');
   };
   var klass = void 0;
   var name = _class.is || upperToHyphen(_class.name);
-  if (hasWindow) {
-    var supportsCustomElementsV1 = 'customElements' in window;
-    var supportsShadowDOMV1 = !!HTMLElement.prototype.attachShadow;
-    var template = base.setupTemplate({
+  if (____hasWindow____) {
+    var _template = base.setupTemplate({
       name: name,
-      shady: !supportsShadowDOMV1
+      shady: !____ShadowDOMV1____
     });
-    if (supportsCustomElementsV1) {
+    if (____CustomElementsV1____) {
       klass = function (_class2) {
         babelHelpers.inherits(klass, _class2);
         function klass() {
           babelHelpers.classCallCheck(this, klass);
           var _this = babelHelpers.possibleConstructorReturn(this, (klass.__proto__ || Object.getPrototypeOf(klass)).call(this));
-          base.constructorCallback(_this, _class, template, hasWindow, !supportsShadowDOMV1);
+          base.constructorCallback(_this, _class, _template, ____hasWindow____, !____ShadowDOMV1____);
           return _this;
         }
         babelHelpers.createClass(klass, [{
           key: 'connectedCallback',
           value: function connectedCallback() {
-            base.connectedCallback(this, _class, template);
+            base.connectedCallback(this, _class, _template);
           }
         }, {
           key: 'disconnectedCallback',
@@ -421,7 +421,27 @@ var backed = (function (_class) {
       console.warn('unsupported environment, failed importing polyfills for customElementsV1');
     }
   } else {
-    klass = _class;
+    klass = function (_class3) {
+      babelHelpers.inherits(klass, _class3);
+      function klass() {
+        babelHelpers.classCallCheck(this, klass);
+        var _this2 = babelHelpers.possibleConstructorReturn(this, (klass.__proto__ || Object.getPrototypeOf(klass)).call(this));
+        base.constructorCallback(_this2, _class, template, ____hasWindow____, !____ShadowDOMV1____);
+        return _this2;
+      }
+      babelHelpers.createClass(klass, [{
+        key: 'connectedCallback',
+        value: function connectedCallback() {
+          base.connectedCallback(this, _class, template);
+        }
+      }, {
+        key: 'disconnectedCallback',
+        value: function disconnectedCallback() {
+          if (this.disconnected) this.disconnected();
+        }
+      }]);
+      return klass;
+    }(_class);
   }
   return window[_class.name] = klass;
 });
