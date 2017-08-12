@@ -1,7 +1,9 @@
 'use strict';
 import base from './base.js';
 
-const isWindow = () => {
+const ____CustomElementsV1____ = 'customElements' in window;
+const ____ShadowDOMV1____ = !!HTMLElement.prototype.attachShadow;
+const ____isWindow____ = () => {
   try {
     return window;
   } catch(e) {
@@ -9,7 +11,7 @@ const isWindow = () => {
   }
 };
 
-const hasWindow = isWindow();
+const ____hasWindow____ = ____isWindow____();
 
 /**
  *
@@ -27,20 +29,18 @@ export default _class => {
   let name = _class.is || upperToHyphen(_class.name);
 
   // Setup properties & observers
-  if (hasWindow) {
-    const supportsCustomElementsV1 = 'customElements' in window;
-    const supportsShadowDOMV1 = !!HTMLElement.prototype.attachShadow;
+  if (____hasWindow____) {
 
     const template = base.setupTemplate({
       name: name,
-      shady: !supportsShadowDOMV1
+      shady: !____ShadowDOMV1____
     });
 
-    if (supportsCustomElementsV1) {
+    if (____CustomElementsV1____) {
       klass = class extends _class {
         constructor() {
           super();
-          base.constructorCallback(this, _class, template, hasWindow, !supportsShadowDOMV1);
+          base.constructorCallback(this, _class, template, ____hasWindow____, !____ShadowDOMV1____);
         }
         connectedCallback() {
           base.connectedCallback(this, _class, template);
