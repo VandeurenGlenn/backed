@@ -32,7 +32,7 @@ var polyLoader = ((fills, root = 'bower_components') => {
       if (fill.name === 'shadycss' && !fill.main) {
         fill.main = 'custom-style-interface';
       }
-      return loadScript(bowerMinUrl(name, main, root));
+      return loadScript(bowerMinUrl(fill.name, fill.main, root));
     });
     promises.all(fills).then(() => {
       resolve();
