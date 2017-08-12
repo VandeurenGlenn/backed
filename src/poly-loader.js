@@ -12,16 +12,21 @@ const bowerMinUrl = (name, main) => {
 
 export default () => {
   return new Promise((resolve, reject) => {
+    const promises = [];
     if (!supportsShadowDOMV1) {
       promises.push(loadScript(bowerMinUrl('shadydom')))
       promises.push(
         loadScript(bowerMinUrl('shadycss', 'custom-style-interface')
       ));
     }
-    Promise.all(promises).then(() => {
+    if (promises.length > 0) {
+      Promise.all(promises).then(() => {
+        resolve();
+      }).catch(error => {
+        reject(error);
+      });
+    } else {
       resolve();
-    }).catch(error => {
-      reject(error);
-    });
+    }
   });
 }
