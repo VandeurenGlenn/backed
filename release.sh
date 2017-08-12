@@ -26,7 +26,7 @@ echo $PACKAGE_VERSION
 git add package.json
 git add bower.json
 git add backed.html
-git add dist/**
+git add dist/** --force
 git commit -m ":trollface: Version: $PACKAGE_VERSION"
 
 git tag $PACKAGE_VERSION
