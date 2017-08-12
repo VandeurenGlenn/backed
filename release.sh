@@ -24,15 +24,12 @@ PACKAGE_VERSION=$(cat package.json \
 
 echo $PACKAGE_VERSION
 git add package.json
+git add bower.json
 git add backed.html
 git add dist/**
 git commit -m ":trollface: Version: $PACKAGE_VERSION"
 
-hash=`git log -1 --pretty=%P`
-
 git tag $PACKAGE_VERSION
-
-git reset $hash
 
 # change username back
 git config --global user.name "$username" --replace-all
