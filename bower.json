@@ -14,5 +14,11 @@
     "bower_components",
     "test",
     "tests"
-  ]
+  ],
+  "dependencies": {
+    "custom-elements": "webcomponents/custom-elements#^1.0.2",
+    "shadycss": "webcomponents/shadycss#^1.0.4",
+    "shadydom": "webcomponents/shadydom#^1.0.2",
+    "html-imports": "webcomponents/html-imports#^1.0.1"
+  }
 }
