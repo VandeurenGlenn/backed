@@ -1,5 +1,7 @@
 'use strict';
 import base from './base.js';
+import renderStatus from './internals/render-status.js';
+window['RenderStatus'] = renderStatus;
 
 const ____CustomElementsV1____ = 'customElements' in window;
 const ____ShadowDOMV1____ = !!HTMLElement.prototype.attachShadow;
@@ -12,7 +14,6 @@ const ____isWindow____ = () => {
 };
 
 const ____hasWindow____ = ____isWindow____();
-
 /**
  *
  * @module backed
