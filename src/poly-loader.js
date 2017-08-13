@@ -23,13 +23,19 @@ export default (fills, root='bower_components') => {
   return new Promise((resolve, reject) => {
     fills = ensureArray(fills);
     fills = fills.map(fill => {
-      if (fill.name === 'shadycss' && !fill.main) {
-        fill.main = 'custom-style-interface';
+      let name;
+      let main = null;
+      if (typeof(fill) === 'object') {
+        name = fill.name;
+        main = fill.main;
+      } else {
+        name = fill;
       }
-      return loadScript(bowerMinUrl(fill.name, fill.main, root));
+      if (name === 'shadycss' && !main) {
+        main = 'custom-style-interface';
+      }
+      return loadScript(bowerMinUrl(name, main, root));
     });
-    promises.all(fills).then(() => {
-      resolve();
-    }).catch(error => reject(error));
+    Promise.all(fills).then(() => resolve()).catch(error => reject(error));
   });
 }
