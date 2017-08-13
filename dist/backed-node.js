@@ -371,6 +371,56 @@ var base = {
   shouldRegister: shouldRegister.bind(undefined)
 };
 
+var sheduled = false;
+var afterRenderQue = [];
+var beforeRenderQue = [];
+var callMethod = function callMethod(array) {
+  var context = array[0];
+  var callback = array[1];
+  var args = array[2];
+  try {
+    callback.apply(context, args);
+  } catch (e) {
+    setTimeout(function () {
+      throw e;
+    });
+  }
+};
+var flushQue = function flushQue(que) {
+  while (que.length) {
+    callMethod(que.shift);
+  }
+};
+var runQue = function runQue(que) {
+  for (var i = 0, l = que.length; i < l; i++) {
+    callMethod(que.shift());
+  }
+};
+var shedule = function shedule() {
+  sheduled = true;
+  requestAnimationFrame(function () {
+    flushQue(beforeRenderQue);
+    setTimeout(function () {
+      runQue(afterRenderQue);
+    });
+  });
+};
+var renderStatus = {
+  afterRender: function afterRender(context, callback, args) {
+    if (!sheduled) {
+      shedule();
+    }
+    afterRenderQue.push([context, callback, args]);
+  },
+  beforeRender: function beforeRender(context, callback, args) {
+    if (!sheduled) {
+      shedule();
+    }
+    beforeRenderQue.push([context, callback, args]);
+  }
+};
+
+window['RenderStatus'] = renderStatus;
 var ____CustomElementsV1____ = 'customElements' in window;
 var ____ShadowDOMV1____ = !!HTMLElement.prototype.attachShadow;
 var ____isWindow____ = function ____isWindow____() {
