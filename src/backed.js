@@ -1,10 +1,8 @@
 'use strict';
 import base from './base.js';
 import renderStatus from './internals/render-status.js';
-window['RenderStatus'] = renderStatus;
+import { html } from './../node_modules/lit-html/lit-html.js';
 
-const ____CustomElementsV1____ = 'customElements' in window;
-const ____ShadowDOMV1____ = !!HTMLElement.prototype.attachShadow;
 const ____isWindow____ = () => {
   try {
     return window;
@@ -14,6 +12,13 @@ const ____isWindow____ = () => {
 };
 
 const ____hasWindow____ = ____isWindow____();
+if (____hasWindow____) {
+  window['RenderStatus'] = window['RenderStatus'] || renderStatus;
+  window.html = window.html || html;
+} else {
+  exports['RenderStatus'] = exports['RenderStatus'] || renderStatus;
+  exports.html = exports.html || html;
+}
 /**
  *
  * @module backed
@@ -28,50 +33,48 @@ export default _class => {
 
   // get the tagName or try to make one with class.name
   let name = _class.is || upperToHyphen(_class.name);
-
+  let hasRenderer = false;
   // Setup properties & observers
   if (____hasWindow____) {
-
-    const template = base.setupTemplate({
-      name: name,
-      shady: !____ShadowDOMV1____
-    });
-
-    if (____CustomElementsV1____) {
-      klass = class extends _class {
-        constructor() {
-          super();
-          base.constructorCallback(this, _class, template, ____hasWindow____, !____ShadowDOMV1____);
-        }
-        connectedCallback() {
-          base.connectedCallback(this, _class, template);
-        }
-        disconnectedCallback() {
-          if (this.disconnected) this.disconnected();
-        }
+    const observedAttributes = [];
+    for (const property of Object.entries(_class.properties)) {
+      const {reflect, render} = property[1]
+      if (reflect) {
+        observedAttributes.push(property[0]);
       }
-      if (base.shouldRegister(name, klass)) {
-        customElements.define(name, klass);
-      };
-    } else {
-      console.warn('unsupported environment, failed importing polyfills for customElementsV1');
+      if (render) {
+        hasRenderer = true
+      }
     }
-  } else {
-    // TODO: handle Commonjs (properties, observers, etc ...)
     klass = class extends _class {
+      static get observedAttributes() {
+        return observedAttributes;
+      }
       constructor() {
         super();
-        base.constructorCallback(this, _class, template, ____hasWindow____, !____ShadowDOMV1____);
+        if (hasRenderer && !this.shadowRoot) {
+          this.attachShadow({mode: 'open'});
+        }
+        base.constructorCallback(this, _class, ____hasWindow____);
       }
       connectedCallback() {
-        base.connectedCallback(this, _class, template);
+        base.connectedCallback(this, _class);
       }
       disconnectedCallback() {
         if (this.disconnected) this.disconnected();
       }
+      attributeChangedCallback(name, oldValue, newValue) {
+        this[name] = newValue;
+      }
+    }
+    if (base.shouldRegister(name, klass)) {
+      customElements.define(name, klass);
     };
+    return window[_class.name] = klass;
+  } else {
+    // TODO: add commonjs support
+    // return exports[_class.name]
   }
-  return window[_class.name] = klass;
 };
 
 window.dispatchEvent(new CustomEvent('backed-ready'));

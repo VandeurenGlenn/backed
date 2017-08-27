@@ -3,6 +3,7 @@ import fireEvent from './internals/fire-event.js';
 import toJsProp from './internals/to-js-prop.js';
 import loadScript from './internals/load-script.js';
 import PubSubLoader from './internals/pub-sub-loader.js';
+import { render } from './../node_modules/lit-html/lit-html.js'
 
 window.registeredElements = window.registeredElements || [];
 
@@ -10,75 +11,43 @@ const shouldShim = () => {
   return /Edge/.test(navigator.userAgent) || /Firefox/.test(navigator.userAgent);
 }
 
-const setupTemplate = ({ name: name, shady: shady }) => {
-  try {
-    const ownerDocument = document.currentScript.ownerDocument;
-    const template = ownerDocument.querySelector(`template[id="${name}"]`);
-    if (template) {
-      if (shady) {
-        ShadyCSS.prepareTemplate(template, name);
-      }
-      return template;
-    }
-  } catch (e) {
-    return console.warn(e);
+const isValidRenderer = renderer => {
+  if (!renderer) {
+    return;
   }
-}
-
-const handleShadowRoot = ({ target: target, template: template }) => {
-  if (!target.shadowRoot) {
-    target.attachShadow({mode: 'open'});
-    if (template) {
-      target.shadowRoot.appendChild(
-        document.importNode(template.content, true));
-
-        if (shouldShim()) {
-          const styles = target.shadowRoot.querySelectorAll('style');
-          let _shimmed;
-          if (styles[0]) {
-            _shimmed = document.createElement('style');
-            target.shadowRoot.insertBefore(_shimmed, target.shadowRoot.firstChild);
-          }
-          for (let style of styles) {
-            _shimmed.innerHTML += style.innerHTML
-              .replace(/:host\b/gm, target.localName)
-              .replace(/::content\b/gm, '');
-
-            target.shadowRoot.removeChild(style);
-          }
-        }
-    }
-  }
+  return String(renderer).includes('return html`')
 }
 
 const handleProperties = (target, properties) => {
   if (properties) {
-    for (let property of Object.keys(properties)) {
-      const observer = properties[property].observer;
-      const strict = properties[property].strict;
-      const isGlobal = properties[property].global;
-      handlePropertyObserver(target, property, observer, {
-        strict: strict || false,
-        global: isGlobal || false
-      });
-      target[property] = properties[property].value;
-      // Bind(superclass, superclass.properties)
+    for (let entry of Object.entries(properties)) {
+      handleProperty(target, entry[0], entry[1]);
+      // TODO: are we ignoring stuff ...?
+      // check if attribute has value else pass default property value
+      target[entry[0]] = target.hasAttribute(entry[0]) ? target.getAttribute(entry[0]) : entry[1].value;
     }
   }
 }
 
-const handlePropertyObserver = (obj, property, observer, opts={
-  strict: false, global:false
-}) => {
+const handleProperty = (obj, property, {observer, strict, global, reflect, render, value }) => {
 
-  if (observer && _needsObserverSetup(obj, property)) {
+  if (Boolean(observer || global) && _needsObserverSetup(obj, property)) {
+    // Ensure we don't do duplicate work
     obj.observedProperties.push(property);
 
     // subscribe only when a callback is defined, all other global options are still available ...
-    if (opts.global && obj[observer]) {
+    if (global && obj[observer]) {
+      // Warning, global observers don't work the same like bindings, each observer has it's namespace created like global.name,
+      // so whenever another element has an global observer for name, they will subscribe to the same publisher !
+      // TODO: Add local binding & improve global observers
+      // {{name}} for normal bindings & {{global::name}} for global bindings(observers) (like Polymer does)
+      // this means we need to build a system that keeps track of each component it's bindings &
+      // values should be set as property, so we know if a value needs to be set on attribute, rerender template, etc ..
       PubSub.subscribe(`global.${property}`, obj[observer].bind(obj));
     }
-    setupObserver(obj, property, observer, opts)
+    setupObserver(obj, property, observer, {strict, global, reflect, renderer: render})
+  } else if (!Boolean(observer || global) && Boolean(reflect || render)) {
+    setupObserver(obj, property, observer, {strict, global, reflect, renderer: render})
   }
 }
 
@@ -103,7 +72,7 @@ const forObservers = (target, observers, isGlobal=false) => {
     parts = parts.slice(1);
     for (let property of parts) {
       if (property.length) {
-        handlePropertyObserver(target, property, fn, {
+        handleProperty(target, property, fn, {
           strict: false,
           global: isGlobal
         });
@@ -126,12 +95,12 @@ const forObservers = (target, observers, isGlobal=false) => {
  * @arg {boolean} strict
  * @arg {method} fn The method to run on change
  */
-const setupObserver = (obj, property, fn, opts={
-  strict: false, global: false
-}) => {
-  const isConfigurable = opts.strict ? false : true;
+const setupObserver = (obj, property, fn, {strict, global, reflect, renderer}) => {
   Object.defineProperty(obj, property, {
     set(value) {
+      if (value === undefined) {
+        return
+      }
       if (this[`_${property}`] === value) {
         return;
       }
@@ -140,10 +109,22 @@ const setupObserver = (obj, property, fn, opts={
         property: property,
         value: value
       };
-      if (opts.global) {
+      if (reflect) {
+        if (value) this.setAttribute(property, String(value));
+        else this.removeAttribute(property);
+      }
+      if (renderer) {
+        if (typeof renderer === 'boolean') {
+          render(this.render(), this.shadowRoot);
+        } else {
+          // adds support for multiple renderers
+          render(this[renderer](), this.shadowRoot);
+        }
+      }
+      if (global) {
         data.instance = this;
         PubSub.publish(`global.${property}`, data);
-      } else {
+      } else if(fn) {
         if (this[fn]) {
           this[fn](data);
         } else {
@@ -154,7 +135,7 @@ const setupObserver = (obj, property, fn, opts={
     get() {
       return this[`_${property}`];
     },
-    configurable: isConfigurable
+    configurable: strict ? false : true
   });
 }
 
@@ -191,21 +172,17 @@ const ready = target => {
   });
 }
 
-const constructorCallback = (target=HTMLElement, klass=Function, template=null, hasWindow=false, shady) => {
+const constructorCallback = (target=HTMLElement, klass=Function, hasWindow=false) => {
   PubSubLoader(hasWindow);
-
-  if (shady) {
-    ShadyCSS.styleElement(target)
-  }
 
   target.fireEvent = target.fireEvent || fireEvent.bind(target);
   target.toJsProp = target.toJsProp || toJsProp.bind(target);
   target.loadScript = target.loadScript || loadScript.bind(target);
 
-  // setup shadowRoot
-  handleShadowRoot({target: target, template: template});
+
   // setup properties
   handleProperties(target, klass.properties);
+  handleObservers(target, klass.observers, klass.globalObservers);
 
   if (!target.registered && target.created) target.created();
 
@@ -213,10 +190,8 @@ const constructorCallback = (target=HTMLElement, klass=Function, template=null, 
   target.registered = true;
 }
 
-const connectedCallback = (target=HTMLElement, klass=Function, template=null) => {
+const connectedCallback = (target=HTMLElement, klass=Function) => {
   if (target.connected) target.connected();
-  // setup properties
-  handleObservers(target, klass.observers, klass.globalObservers);
   // setup listeners
   handleListeners(target)
   // notify everything is ready
@@ -232,14 +207,8 @@ const shouldRegister = (name, klass) => {
 }
 
 export default {
-  setupTemplate: setupTemplate.bind(this),
-  handleShadowRoot: handleShadowRoot.bind(this),
-  handleProperties: handleProperties.bind(this),
-  handlePropertyObserver: handlePropertyObserver.bind(this),
-  handleObservers: handleObservers.bind(this),
-  setupObserver: setupObserver.bind(this),
-  ready: ready.bind(this),
-  connectedCallback: connectedCallback.bind(this),
-  constructorCallback: constructorCallback.bind(this),
-  shouldRegister: shouldRegister.bind(this)
+  ready: ready,
+  connectedCallback: connectedCallback,
+  constructorCallback: constructorCallback,
+  shouldRegister: shouldRegister
 }
