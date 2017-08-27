@@ -3084,6 +3084,7 @@
                                     "column": 7
                                   }
                                 },
+                                "static": true,
                                 "computed": false,
                                 "key": {
                                   "type": "Identifier",
@@ -3102,7 +3103,6 @@
                                   },
                                   "name": "observedAttributes"
                                 },
-                                "static": true,
                                 "kind": "get",
                                 "id": null,
                                 "generator": false,
@@ -3174,6 +3174,7 @@
                                     "column": 7
                                   }
                                 },
+                                "static": false,
                                 "computed": false,
                                 "key": {
                                   "type": "Identifier",
@@ -3192,7 +3193,6 @@
                                   },
                                   "name": "constructor"
                                 },
-                                "static": false,
                                 "kind": "constructor",
                                 "id": null,
                                 "generator": false,
@@ -3696,6 +3696,7 @@
                                     "column": 7
                                   }
                                 },
+                                "static": false,
                                 "computed": false,
                                 "key": {
                                   "type": "Identifier",
@@ -3714,7 +3715,6 @@
                                   },
                                   "name": "connectedCallback"
                                 },
-                                "static": false,
                                 "kind": "method",
                                 "id": null,
                                 "generator": false,
@@ -3868,6 +3868,7 @@
                                     "column": 7
                                   }
                                 },
+                                "static": false,
                                 "computed": false,
                                 "key": {
                                   "type": "Identifier",
@@ -3886,7 +3887,6 @@
                                   },
                                   "name": "disconnectedCallback"
                                 },
-                                "static": false,
                                 "kind": "method",
                                 "id": null,
                                 "generator": false,
@@ -4069,6 +4069,7 @@
                                     "column": 7
                                   }
                                 },
+                                "static": false,
                                 "computed": false,
                                 "key": {
                                   "type": "Identifier",
@@ -4087,7 +4088,6 @@
                                   },
                                   "name": "attributeChangedCallback"
                                 },
-                                "static": false,
                                 "kind": "method",
                                 "id": null,
                                 "generator": false,
@@ -5095,7 +5095,7 @@
         "label": "import",
         "keyword": "import",
         "beforeExpr": false,
-        "startsExpr": false,
+        "startsExpr": true,
         "rightAssociative": false,
         "isLoop": false,
         "isAssign": false,
@@ -5228,7 +5228,7 @@
         "label": "import",
         "keyword": "import",
         "beforeExpr": false,
-        "startsExpr": false,
+        "startsExpr": true,
         "rightAssociative": false,
         "isLoop": false,
         "isAssign": false,
@@ -5361,7 +5361,7 @@
         "label": "import",
         "keyword": "import",
         "beforeExpr": false,
-        "startsExpr": false,
+        "startsExpr": true,
         "rightAssociative": false,
         "isLoop": false,
         "isAssign": false,
