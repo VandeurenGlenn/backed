@@ -1,6 +1,3 @@
-var polyLoader = (function () {
-'use strict';
-
 const loadScript = src => {
   return new Promise((resolve, reject) => {
     let script = document.createElement('script');
@@ -46,7 +43,5 @@ var polyLoader = ((fills, root = 'bower_components') => {
   });
 });
 
-return polyLoader;
-
-}());
+export default polyLoader;
 //# sourceMappingURL=poly-loader.js.map
