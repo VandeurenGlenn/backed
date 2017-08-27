@@ -26,6 +26,7 @@ const runQue = que => {
   for (let i=0, l=que.length; i < l; i++) {
     callMethod(que.shift());
   }
+  sheduled = false;
 }
 
 const shedule = () => {
