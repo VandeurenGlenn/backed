@@ -1,10 +1,11 @@
 # backed [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-image]][daviddm-url] [![Coverage percentage][coveralls-image]][coveralls-url]
-> A collection of methods for easy &amp; fast es6 elements
+> Small web framework for quick app & component development
 
 ## Features
-- customElementsV1 support
-- Commonjs (node) support
-- Internal & global property observers
+- class development without the worry of constructors and calling super
+- internal/scoped & global property observers, checkout [using observers]
+- updates property values to attributes & the otherway around, checkout [using reflect]
+- templating using [lit-html], checkout [using render]
 
 ## Installation
 
@@ -21,9 +22,6 @@ $ npm install --save backed
 ### Basic usage
 ```js
 Backed(class extends HTMLElement {
-  constructor() { // note that constructors are ignored when running as a customElement V0
-    super();
-  }
   ready() {
     // ready to go ...
   }
@@ -41,9 +39,6 @@ Backed(class extends HTMLElement {
       }
     }
   }
-  constructor() {
-    super();
-  }
   ready() {
     // ready to go ...
   }
@@ -53,30 +48,94 @@ Backed(class extends HTMLElement {
 });
 ```
 
+### Using reflect
+
+```js
+Backed(class extends HTMLElement {
+  static get properties() {
+    return {
+      name: {
+        reflect: true
+      }
+    }
+  }
+  ready() {
+    // ready to go ...
+  }
+});
+```
+
+### Using render
+
+```js
+Backed(class extends HTMLElement {
+  static get properties() {
+    return {
+      name: {
+        render: true,
+        value: 'name should go here'
+      },      
+      lastname: {
+        render: true
+        value: 'lastname should go here'
+      }
+    }
+  }
+  render() {
+    html`
+      <style></style>
+      <h1>${this.name}</h1>
+      <h2>${this.lastname}</h2>
+    `
+  }
+});
+```
+#### or
+
+warning: watch out when using multiple renderers, when doing this the element will have the templateResult of the last render
+```js
+Backed(class extends HTMLElement {
+  static get properties() {
+    return {
+      name: {
+        render: 'renderName'
+      }
+    }
+  }
+  renderName() {
+    html`
+      <style></style>
+      <h1>${this.name}</h1>
+    `
+  }
+});
+```
+
 ## More info
 - [wiki](https://github.com/VandeurenGlenn/backed/wiki)
 
 ## Roadmap
 - [x] Support customElementsV1
-- [x] Support commonjs (node)
+- [ ] Support commonjs (node)
 - [x] Add observer support
 - [x] Add global observer support
-- [ ] Fallback to customElementsV0 when V1 is unsupported
-- [ ] Support running multiple Backed version
 
 ## TODO
 
-- [ ] Add private property support
+- [ ] Add strict property support (wip)
 - [ ] Handle Commonjs (properties, observers, etc ...)
 - [ ] Bind properties & attributes (use pubsub to notify changes)
-- [ ] Update README
+- [x] Reflect properties & attributes
 - [ ] Add demo's
 - [ ] Add documentation
 
 ## License
 
 CC-BY-NC-ND-4.0 © [Glenn Vandeuren]()
-
+[lit-html]: https://www.npmjs.com/package/lit-html
+[using observers]: README.md#using-observers
+[using reflect]: README.md#using-reflect
+[using render]: README.md#using-render
 [npm-image]: https://badge.fury.io/js/backed.svg
 [npm-url]: https://npmjs.org/package/backed
 [travis-image]: https://travis-ci.org/basicelements/backed.svg?branch=master
