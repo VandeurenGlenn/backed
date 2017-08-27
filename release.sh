@@ -1,20 +1,4 @@
 #!/bin/sh
-# create a backup of everything that changes temporary
-username=`git config user.name`
-echo $username
-
-# change username to auto releaser
-git config --global user.name "AutoRelease" --replace-all
-
-# get value
-value=`cat dist/backed.js`
-
-# write value
-echo '<script>'$value'' > backed.html
-
-# fix mappingURL & add end script tag
-sed -i 's/\/\/\# sourceMappingURL=backed.js.map/<\/script>\/\/\# sourceMappingURL=dist\/backed.js.map/' backed.html
-
 # Version key/value should be on his own line
 PACKAGE_VERSION=$(cat package.json \
   | grep version \
@@ -23,15 +7,14 @@ PACKAGE_VERSION=$(cat package.json \
   | sed 's/[",]//g')
 
 echo $PACKAGE_VERSION
+
+uglifyjs dist/backed.js --compress --mangle --keep-fnames --ecma 6 --output dist/backed.min.js
+uglifyjs dist/poly-loader.js --compress --mangle --keep-fnames --ecma 6 --output dist/poly-loader.min.js
+
 git add package.json
-git add bower.json
-git add backed.html
-git add dist/** --force
+git add docs
 git commit -m ":trollface: Version: $PACKAGE_VERSION"
 
 git tag $PACKAGE_VERSION
-
-# change username back
-git config --global user.name "$username" --replace-all
 
 git push origin $PACKAGE_VERSION
