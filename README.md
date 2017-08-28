@@ -3,9 +3,9 @@
 
 ## Features
 - class development without the worry of constructors and calling super
-- internal/scoped & global property observers, checkout [using observers]
-- updates property values to attributes & the otherway around, checkout [using reflect]
-- templating using [lit-html], checkout [using render]
+- internal/scoped & global property observers, checkout [![using observers]][using-observers]
+- updates property values to attributes & the otherway around, checkout [![using reflect]][using-reflect]
+- templating using [![lit-html]][lit-html], checkout [![using render]][using-render]
 
 ## Installation
 
@@ -133,9 +133,9 @@ Backed(class extends HTMLElement {
 
 CC-BY-NC-ND-4.0 © [Glenn Vandeuren]()
 [lit-html]: https://www.npmjs.com/package/lit-html
-[using observers]: README.md#using-observers
-[using reflect]: README.md#using-reflect
-[using render]: README.md#using-render
+[using-observers]: README.md#using-observers
+[using-reflect]: README.md#using-reflect
+[using-render]: README.md#using-render
 [npm-image]: https://badge.fury.io/js/backed.svg
 [npm-url]: https://npmjs.org/package/backed
 [travis-image]: https://travis-ci.org/basicelements/backed.svg?branch=master
