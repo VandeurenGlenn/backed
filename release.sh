@@ -8,8 +8,9 @@ PACKAGE_VERSION=$(cat package.json \
 
 echo $PACKAGE_VERSION
 
-uglifyjs dist/backed.js --compress --mangle --keep-fnames --ecma 6 --output dist/backed.min.js
-uglifyjs dist/poly-loader.js --compress --mangle --keep-fnames --ecma 6 --output dist/poly-loader.min.js
+uglifyjs backed.js --compress --mangle --keep-fnames --ecma 6 --output backed.min.js
+uglifyjs lit-mixin.js --compress --mangle --keep-fnames --ecma 6 --output lit-mixin.min.js
+uglifyjs poly-loader.js --compress --mangle --keep-fnames --ecma 6 --output poly-loader.min.js
 
 git add package.json
 git add docs
