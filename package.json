@@ -69,7 +69,7 @@
   "backed": {
     "bundles": [
       {
-        "src": "src/poly-loader.js",
+        "src": "./src/poly-loader.js",
         "dest": "poly-loader.js",
         "moduleName": "polyLoader",
         "format": "es",
@@ -81,8 +81,8 @@
           }
         }
       }, {
-        "src": "src/mixins/lit-mixin.js",
-        "dest": "lit-mixin.js",
+        "src": "./src/mixins/lit-mixin.js",
+        "dest": "mixins/lit-mixin.js",
         "moduleName": "LitMixin",
         "format": "es",
         "plugins": {
@@ -93,7 +93,19 @@
           }
         }
       }, {
-        "src": "src/backed.js",
+        "src": "./src/mixins/property-mixin.js",
+        "dest": "mixins/property-mixin.js",
+        "moduleName": "PropertyMixin",
+        "format": "es",
+        "plugins": {
+          "babel": {
+            "presets": [
+              "es2016"
+            ]
+          }
+        }
+      }, {
+        "src": "./src/backed.js",
         "dest": "backed.js",
         "moduleName": "Backed",
         "format": "es",

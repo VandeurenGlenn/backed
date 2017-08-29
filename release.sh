@@ -9,7 +9,8 @@ PACKAGE_VERSION=$(cat package.json \
 echo $PACKAGE_VERSION
 
 uglifyjs backed.js --compress --mangle --keep-fnames --ecma 6 --output backed.min.js
-uglifyjs lit-mixin.js --compress --mangle --keep-fnames --ecma 6 --output lit-mixin.min.js
+uglifyjs mixins/lit-mixin.js --compress --mangle --keep-fnames --ecma 6 --output mixins/lit-mixin.min.js
+uglifyjs mixins/property-mixin.js --compress --mangle --keep-fnames --ecma 6 --output mixins/property-mixin.min.js
 uglifyjs poly-loader.js --compress --mangle --keep-fnames --ecma 6 --output poly-loader.min.js
 
 git add package.json

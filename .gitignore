@@ -4,3 +4,6 @@ dist/**
 /*.min.js
 /*.js
 /*.js.map
+/mixins/*.min.js
+/mixins/*.js
+/mixins/*.js.map
