@@ -2,7 +2,7 @@
   "name": "backed",
   "version": "0.9.0-alpha.1",
   "description": "Small web framework for quick app & component development",
-  "main": "dist/backed.js",
+  "main": "backed.js",
   "scripts": {
     "prepublish": "npm run release",
     "release": "esdoc && sh release.sh",
@@ -70,7 +70,7 @@
     "bundles": [
       {
         "src": "src/poly-loader.js",
-        "dest": "dist/poly-loader.js",
+        "dest": "poly-loader.js",
         "moduleName": "polyLoader",
         "format": "es",
         "plugins": {
@@ -80,10 +80,21 @@
             ]
           }
         }
-      },
-      {
+      }, {
+        "src": "src/mixins/lit-mixin.js",
+        "dest": "lit-mixin.js",
+        "moduleName": "LitMixin",
+        "format": "es",
+        "plugins": {
+          "babel": {
+            "presets": [
+              "es2016"
+            ]
+          }
+        }
+      }, {
         "src": "src/backed.js",
-        "dest": "dist/backed.js",
+        "dest": "backed.js",
         "moduleName": "Backed",
         "format": "es",
         "plugins": {
