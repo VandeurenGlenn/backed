@@ -1,4 +1,4 @@
-import { html, render } from 'node_modules/lit-html/lit-html.js';
+import { html, render } from '/node_modules/lit-html/lit-html.js';
 
 window.html = window.html || html;
 window.Backed = window.Backed || {};
@@ -14,8 +14,8 @@ export default base => {
    get propertyStore() {
      return window.Backed.PropertyStore;
    }
-   constructor({properties}) {
-     super();
+   constructor(options = {}) {
+     super(options);
      this.attachShadow({mode: 'open'});
      if (!this._isValidRenderer(this.render)) throw 'Invalid renderer!'
      if (this.render) render(this.render(), this.shadowRoot);
