@@ -8,4 +8,4 @@ rm -rf backed.js.map
 rm -rf poly-loader.js
 rm -rf poly-loader.min.js
 rm -rf poly-loader.js.map
-rm -rf mixins/**
+rm -rf mixins
