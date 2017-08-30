@@ -4,7 +4,7 @@
   "description": "Small web framework for quick app & component development",
   "main": "backed.js",
   "scripts": {
-    "prepublish": "esdoc && sh scripts/release.sh",
+    "prepublish": "esdoc && sh scripts/release.sh && sh scripts/gh-pages.sh",
     "postpublish": "sh scripts/clean.sh",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

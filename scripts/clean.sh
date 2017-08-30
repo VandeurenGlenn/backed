@@ -2,6 +2,7 @@
 
 echo 'cleaning ...'
 
+rm -rf .gh-pages-tmp
 rm -rf backed.js
 rm -rf backed.min.js
 rm -rf backed.js.map
