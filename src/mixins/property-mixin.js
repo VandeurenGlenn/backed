@@ -25,8 +25,9 @@ export default base => {
             if (renderer && !render) {
               console.warn('Renderer undefined');
             }
-            this.defineProperty(entry[0], entry[1]);
           }
+          // allways define property even when renderer is not found.
+          this.defineProperty(entry[0], entry[1]);
         }
       }
     }
@@ -43,7 +44,7 @@ export default base => {
           this[`___${property}`] = value;
 
           if (reflect) {
-            if (value) this.setAttributte(property, String(value));
+            if (value) this.setAttribute(property, String(value));
             else this.removeAttribute(property);
           }
 
