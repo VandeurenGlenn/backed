@@ -1,6 +1,7 @@
 import { html, render } from './../../node_modules/lit-html/lit-html.js';
-
+import { repeat } from './../../node_modules/lit-html/lib/repeat.js';
 window.html = window.html || html;
+window.repeat = window.repeat || repeat;
 window.Backed = window.Backed || {};
 window.Backed.Renderer = window.Backed.Renderer || render;
 
