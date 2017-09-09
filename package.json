@@ -27,7 +27,8 @@
     "uglify-es": "^3.0.28"
   },
   "dependencies": {
-    "lit-html": "^0.5.0"
+    "lit-html": "^0.5.0",
+    "lodash": "^4.17.4"
   },
   "resolutions": {
     "debug": "2.6.3",
@@ -64,7 +65,8 @@
     "domutils": "1.6.2",
     "domelementtype": "1.3.0",
     "domhandler": "2.4.1",
-    "assert-plus": "1.0.0"
+    "assert-plus": "1.0.0",
+    "lodash": "4.17.4"
   },
   "backed": {
     "bundles": [
@@ -80,7 +82,8 @@
             ]
           }
         }
-      }, {
+      },
+      {
         "src": "./src/mixins/lit-mixin.js",
         "dest": "mixins/lit-mixin.js",
         "moduleName": "LitMixin",
@@ -92,7 +95,8 @@
             ]
           }
         }
-      }, {
+      },
+      {
         "src": "./src/mixins/property-mixin.js",
         "dest": "mixins/property-mixin.js",
         "moduleName": "PropertyMixin",
@@ -104,7 +108,8 @@
             ]
           }
         }
-      }, {
+      },
+      {
         "src": "./src/backed.js",
         "dest": "backed.js",
         "moduleName": "Backed",
