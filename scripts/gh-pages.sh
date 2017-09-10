@@ -7,7 +7,10 @@ MSG="Deployed to Github pages: ${REF}"
 
 mkdir -p .gh-pages-tmp
 cp demo/* .gh-pages-tmp/demo -r
-cp docs/** .gh-pages-tmp -r
+cp docs/** .gh-pages-tmp/docs -r
+cp node_modules/custom-docs/custom-docs.js .gh-pages-tmp/custom-docs.js
+cp node_modules/custom-docs/src/** .gh-pages-tmp/src -r
+cp .gh-pages-tmp/custom-docs/index.html .gh-pages-tmp/index.html
 # cp docs/**/** .gh-pages-tmp
 # cp docs .gh-pages-tmp
 # TODO: add docs/demo selector ...
