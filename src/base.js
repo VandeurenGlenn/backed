@@ -1,7 +1,6 @@
 'use strict';
-import fireEvent from './internals/fire-event.js';
-import toJsProp from './internals/to-js-prop.js';
-import loadScript from './internals/load-script.js';
+
+import { loadScript, fireEvent, toJsProp } from './utils.js';
 import PubSubLoader from './internals/pub-sub-loader.js';
 import { render } from './../node_modules/lit-html/lit-html.js'
 
