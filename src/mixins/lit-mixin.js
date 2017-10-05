@@ -6,7 +6,7 @@ window.Backed = window.Backed || {};
 window.Backed.Renderer = window.Backed.Renderer || render;
 
 /**
- * @module PropertyMixin
+ * @module LitMixin
  * @mixin Backed
  * @param {class} base class to extend from
  */
@@ -17,8 +17,11 @@ export default base => {
    }
    constructor(options = {}) {
      super(options);
-     this.attachShadow({mode: 'open'});
+     if (!this.shadowRoot) this.attachShadow({mode: 'open'});
      if (!this._isValidRenderer(this.render)) throw 'Invalid renderer!'
+   }
+   connectedCallback() {
+     if (super.connectedCallback) super.connectedCallback();
      if (this.render) render(this.render(), this.shadowRoot);
      else throw 'Missing render method!';
    }
@@ -26,7 +29,7 @@ export default base => {
      if (!renderer) {
        return;
      }
-     return String(renderer).includes('return html`')
+     return String(renderer).includes('return html`') || String(renderer).includes('return this.template')
    }
  }
 }
