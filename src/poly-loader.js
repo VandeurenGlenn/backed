@@ -1,5 +1,5 @@
 'use strict';
-import loadScript from './internals/load-script';
+import { loadScript } from './utils.js';
 
 const bowerMinUrl = (name, main, root) => {
   const url = main ? `${name}/${main}` : `${name}/${name}`;

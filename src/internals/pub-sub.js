@@ -1,5 +1,5 @@
 'use strict';
-export default class {
+class PubSub {
 
   /**
    * Creates handlers
@@ -37,3 +37,5 @@ export default class {
     }
   }
 }
+
+export default window.PubSub ? window.PubSub : window.PubSub = new PubSub();

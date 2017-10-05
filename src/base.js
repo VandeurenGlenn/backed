@@ -1,7 +1,7 @@
 'use strict';
 
-import { loadScript, fireEvent, toJsProp } from './utils.js';
-import PubSubLoader from './internals/pub-sub-loader.js';
+import { loadScript, fireEvent, toJsProp, RenderStatus } from './utils.js';
+import PubSub from './internals/pub-sub.js';
 import { render } from './../node_modules/lit-html/lit-html.js'
 
 window.registeredElements = window.registeredElements || [];
@@ -95,6 +95,9 @@ const forObservers = (target, observers, isGlobal=false) => {
  * @arg {method} fn The method to run on change
  */
 const setupObserver = (obj, property, fn, {strict, global, reflect, renderer}) => {
+  if (renderer && !obj.shadowRoot) {
+    obj.attachShadow({mode: 'open'})
+  }
   Object.defineProperty(obj, property, {
     set(value) {
       if (value === undefined) {
@@ -147,7 +150,7 @@ const handleObservers = (target, observers=[], globalObservers=[]) => {
 }
 
 const handleListeners = target => {
-  const attributes = target.attributes
+  const attributes = target.attributes;
   for (const attribute of attributes) {
     if (String(attribute.name).includes('on-')) {
       const fn = attribute.value;
@@ -172,7 +175,6 @@ const ready = target => {
 }
 
 const constructorCallback = (target=HTMLElement, klass=Function, hasWindow=false) => {
-  PubSubLoader(hasWindow);
 
   target.fireEvent = target.fireEvent || fireEvent.bind(target);
   target.toJsProp = target.toJsProp || toJsProp.bind(target);
@@ -180,8 +182,6 @@ const constructorCallback = (target=HTMLElement, klass=Function, hasWindow=false
 
 
   // setup properties
-  handleProperties(target, klass.properties);
-  handleObservers(target, klass.observers, klass.globalObservers);
 
   if (!target.registered && target.created) target.created();
 
@@ -191,6 +191,8 @@ const constructorCallback = (target=HTMLElement, klass=Function, hasWindow=false
 
 const connectedCallback = (target=HTMLElement, klass=Function) => {
   if (target.connected) target.connected();
+  handleProperties(target, klass.properties);
+  handleObservers(target, klass.observers, klass.globalObservers);
   // setup listeners
   handleListeners(target)
   // notify everything is ready
