@@ -6,18 +6,16 @@ const render = window.Backed.Renderer;
 // TODO: Create & add global observer
 export default base => {
   return class PropertyMixin extends base {
-    constructor(options = {}) {
-      super(options);
-      this.properties = options.properties;
+    static get observedAttributes() {
+      return Object.entries(this.properties).map(entry => {if (entry[1].reflect) {return entry[0]} else return null});
     }
 
-    connectedCallback() {
-      // test first
-      // if (this.async) {
-        // return new Promise((resolve, reject) {
-        //   this.defineProperty()
-        // });
-      // }
+    get properties() {
+      return customElements.get(this.localName).properties;
+    }
+
+    constructor() {
+      super();
       if (this.properties) {
         for (const entry of Object.entries(this.properties)) {
           const { observer, reflect, renderer } = entry[1];
@@ -30,6 +28,30 @@ export default base => {
           this.defineProperty(entry[0], entry[1]);
         }
       }
+    }
+
+    connectedCallback() {
+      if (super.connectedCallback) super.connectedCallback();
+      if (this.attributes)
+        for (const attribute of this.attributes) {
+          if (String(attribute.name).includes('on-')) {
+            const fn = attribute.value;
+            const name = attribute.name.replace('on-', '');
+            target.addEventListener(String(name), event => {
+              target = event.path[0];
+              while (!target.host) {
+                target = target.parentNode;
+              }
+              if (target.host[fn]) {
+                target.host[fn](event);
+              }
+            });
+          }
+      }
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+      this[name] = newValue;
     }
 
     /**
