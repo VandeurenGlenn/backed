@@ -11,7 +11,7 @@ mkdir -p .gh-pages-tmp/demo
 
 cp demo/* .gh-pages-tmp/demo -r
 cp docs/** .gh-pages-tmp/docs -r
-cp node_modules/custom-docs/src/ .gh-pages-tmp/src/ -r
+cp node_modules/custom-docs/src/custom-docs.js .gh-pages-tmp/src/custom-docs.js -r
 cp node_modules/custom-docs/index.html .gh-pages-tmp/index.html
 # cp docs/**/** .gh-pages-tmp
 # cp docs .gh-pages-tmp
