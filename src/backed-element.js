@@ -2,7 +2,6 @@ import LitMixin from './mixins/lit-mixin.js';
 import PropertyMixin from './mixins/property-mixin.js';
 import {define} from './utils.js';
 
-window.repeat = window.repeat || repeat;
 window.define = window.define || define;
 
 export default (base=HTMLElement) => {
