@@ -8,6 +8,8 @@ MSG="Deployed to Github pages: ${REF}"
 mkdir -p .gh-pages-tmp
 mkdir -p .gh-pages-tmp/docs
 mkdir -p .gh-pages-tmp/demo
+mkdir -p .gh-pages-tmp/src
+mkdir -p .gh-pages-tmp/mixins
 
 cp demo/* .gh-pages-tmp/demo -r
 cp docs/** .gh-pages-tmp/docs -r
