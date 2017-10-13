@@ -808,7 +808,7 @@
     "__docId__": 43,
     "kind": "file",
     "name": "src/utils.js",
-    "content": "//\n// toJsProp\n//\n\n/**\n * @mixin Backed\n * @module utils\n * @export toJsProp\n *\n * some-prop -> someProp\n *\n * @param {string} string The content to convert\n * @return {string} string\n */\nexport const toJsProp = string => {\n  let parts = string.split('-');\n  if (parts.length > 1) {\n    var upper = parts[1].charAt(0).toUpperCase();\n    string = parts[0] + upper + parts[1].slice(1).toLowerCase();\n  }\n  return string;\n}\n/**\n* Replaces all accented chars with regular ones\n*/\nconst replaceAccents = string => {\n  // verifies if the String has accents and replace them\n  if (string.search(/[\\xC0-\\xFF]/g) > -1) {\n      string = string\n              .replace(/[\\xC0-\\xC5]/g, \"A\")\n              .replace(/[\\xC6]/g, \"AE\")\n              .replace(/[\\xC7]/g, \"C\")\n              .replace(/[\\xC8-\\xCB]/g, \"E\")\n              .replace(/[\\xCC-\\xCF]/g, \"I\")\n              .replace(/[\\xD0]/g, \"D\")\n              .replace(/[\\xD1]/g, \"N\")\n              .replace(/[\\xD2-\\xD6\\xD8]/g, \"O\")\n              .replace(/[\\xD9-\\xDC]/g, \"U\")\n              .replace(/[\\xDD]/g, \"Y\")\n              .replace(/[\\xDE]/g, \"P\")\n              .replace(/[\\xE0-\\xE5]/g, \"a\")\n              .replace(/[\\xE6]/g, \"ae\")\n              .replace(/[\\xE7]/g, \"c\")\n              .replace(/[\\xE8-\\xEB]/g, \"e\")\n              .replace(/[\\xEC-\\xEF]/g, \"i\")\n              .replace(/[\\xF1]/g, \"n\")\n              .replace(/[\\xF2-\\xF6\\xF8]/g, \"o\")\n              .replace(/[\\xF9-\\xFC]/g, \"u\")\n              .replace(/[\\xFE]/g, \"p\")\n              .replace(/[\\xFD\\xFF]/g, \"y\");\n  }\n\n  return string;\n}\n\nconst removeNonWord = string => string.replace(/[^0-9a-zA-Z\\xC0-\\xFF \\-]/g, '');\n\nconst WHITE_SPACES = [\n    ' ', '\\n', '\\r', '\\t', '\\f', '\\v', '\\u00A0', '\\u1680', '\\u180E',\n    '\\u2000', '\\u2001', '\\u2002', '\\u2003', '\\u2004', '\\u2005', '\\u2006',\n    '\\u2007', '\\u2008', '\\u2009', '\\u200A', '\\u2028', '\\u2029', '\\u202F',\n    '\\u205F', '\\u3000'\n];\n\n/**\n* Remove chars from beginning of string.\n*/\nconst ltrim = (string, chars) => {\n  chars = chars || WHITE_SPACES;\n\n  var start = 0,\n      len = string.length,\n      charLen = chars.length,\n      found = true,\n      i, c;\n\n  while (found && start < len) {\n      found = false;\n      i = -1;\n      c = string.charAt(start);\n\n      while (++i < charLen) {\n          if (c === chars[i]) {\n              found = true;\n              start++;\n              break;\n          }\n      }\n  }\n\n  return (start >= len) ? '' : string.substr(start, len);\n}\n\n/**\n* Remove chars from end of string.\n*/\nconst rtrim = (string, chars) => {\n  chars = chars || WHITE_SPACES;\n\n  var end = string.length - 1,\n      charLen = chars.length,\n      found = true,\n      i, c;\n\n  while (found && end >= 0) {\n      found = false;\n      i = -1;\n      c = string.charAt(end);\n\n      while (++i < charLen) {\n          if (c === chars[i]) {\n              found = true;\n              end--;\n              break;\n          }\n      }\n  }\n\n  return (end >= 0) ? string.substring(0, end + 1) : '';\n}\n\n/**\n * Add space between camelCase text.\n */\nconst unCamelCase = string => {\n  string = string.replace(/([a-z\\xE0-\\xFF])([A-Z\\xC0\\xDF])/g, '$1 $2');\n  string = string.toLowerCase();\n  return string;\n}\n\n/**\n * Remove white-spaces from beginning and end of string.\n */\nexport const trim = (string, chars) => {\n  chars = chars || WHITE_SPACES;\n  return ltrim(rtrim(string, chars), chars);\n}\n\n/**\n * Convert to lower case, remove accents, remove non-word chars and\n * replace spaces with the specified delimeter.\n * Does not split camelCase text.\n */\nexport const slugify = (string, delimeter) => {\n  if (delimeter == null) {\n      delimeter = \"-\";\n  }\n\n  string = replaceAccents(string);\n  string = removeNonWord(string);\n  string = trim(string) //should come after removeNonWord\n          .replace(/ +/g, delimeter) //replace spaces with delimeter\n          .toLowerCase();\n  return string;\n}\n\n/**\n* Replaces spaces with hyphens, split camelCase text, remove non-word chars, remove accents and convert to lower case.\n*/\nexport const hyphenate = string => {\n  string = unCamelCase(string);\n  return slugify(string, \"-\");\n}\n\n//\n// merge\n//\n\n/**\n * @mixin Backed\n * @module utils\n * @export merge\n *\n * some-prop -> someProp\n *\n * @param {object} object The object to merge with\n * @param {object} source The object to merge\n * @return {object} merge result\n */\nexport const merge = (object = {}, source = {}) => {\n  // deep assign\n  for (const key of Object.keys(object)) {\n    if (source[key]) {\n      Object.assign(object[key], source[key]);\n    }\n  }\n  // assign the rest\n  for (const key of Object.keys(source)) {\n    if (!object[key]) {\n      object[key] = source[key];\n    }\n  }\n  return object;\n}\n\n//\n// loadScript\n//\n\n/**\n * @mixin Backed\n * @module utils\n * @export loadScript\n *\n * defer handles loading after the document is parsed, async loads while parsing\n *\n * @param {string} src link/path to the script to load\n * @param {string} method default: 'async',  options: `defer, async, ''`\n * @return {object} merge result\n */\n export const loadScript = (src, method) => {\n   return new Promise((resolve, reject) => {\n     let script = document.createElement('script');\n     script.setAttribute(method, '');\n     script.onload = result => {\n       resolve(result);\n     }\n     script.onerror = error => {\n       reject(error);\n     }\n     script.src = src;\n     document.body.appendChild(script);\n   });\n }\n\n //\n // fireEvent\n //\n\n /**\n  * @mixin backed\n  * @module utils\n  * @export fireEvent\n  *\n  * @param {string} type Name of the event\n  * @param {HTMLElement} target context\n  * @param {string|boolean|number|object|array} detail\n  */\n export const fireEvent = (type='', detail=null, target=this) => {\n   target.dispatchEvent(new CustomEvent(type, {detail: detail}));\n };\n\n\n let sheduled = false;\n const afterRenderQue = [];\n const beforeRenderQue = [];\n\n const callMethod = array => {\n   const context = array[0];\n   const callback = array[1];\n   const args = array[2];\n   try {\n     callback.apply(context, args);\n   } catch(e) {\n     setTimeout(() => {\n       throw e;\n     })\n   }\n };\n\n const flushQue = que => {\n   while (que.length) {\n     callMethod(que.shift);\n   }\n };\n\n const runQue = que => {\n   for (let i=0, l=que.length; i < l; i++) {\n     callMethod(que.shift());\n   }\n   sheduled = false;\n }\n\n const shedule = () => {\n   sheduled = true;\n   requestAnimationFrame(() => {\n     flushQue(beforeRenderQue);\n     setTimeout(() => {\n       runQue(afterRenderQue);\n     });\n   });\n };\n\n export const RenderStatus = (() => {\n   window.RenderStatus = window.RenderStatus || {\n     afterRender: (context, callback, args) => {\n       if (!sheduled) {\n         shedule();\n       }\n       afterRenderQue.push([context, callback, args]);\n     },\n     beforeRender: (context, callback, args) => {\n       if (!sheduled) {\n         shedule();\n       }\n       beforeRenderQue.push([context, callback, args]);\n     }\n   }\n })();\n\n export const shouldRegister = name => {\n   return customElements.get(name) ? false : true;\n }\n\n export const define = klass => {\n   const name = hyphenate(klass.name);\n   return shouldRegister(name) ? customElements.define(name, klass) : '';\n }\n",
+    "content": "//\n// toJsProp\n//\n\n/**\n * @mixin Backed\n * @module utils\n * @export toJsProp\n *\n * some-prop -> someProp\n *\n * @param {string} string The content to convert\n * @return {string} string\n */\nexport const toJsProp = string => {\n  let parts = string.split('-');\n  if (parts.length > 1) {\n    var upper = parts[1].charAt(0).toUpperCase();\n    string = parts[0] + upper + parts[1].slice(1).toLowerCase();\n  }\n  return string;\n}\n/**\n* Replaces all accented chars with regular ones\n*/\nconst replaceAccents = string => {\n  // verifies if the String has accents and replace them\n  if (string.search(/[\\xC0-\\xFF]/g) > -1) {\n      string = string\n              .replace(/[\\xC0-\\xC5]/g, \"A\")\n              .replace(/[\\xC6]/g, \"AE\")\n              .replace(/[\\xC7]/g, \"C\")\n              .replace(/[\\xC8-\\xCB]/g, \"E\")\n              .replace(/[\\xCC-\\xCF]/g, \"I\")\n              .replace(/[\\xD0]/g, \"D\")\n              .replace(/[\\xD1]/g, \"N\")\n              .replace(/[\\xD2-\\xD6\\xD8]/g, \"O\")\n              .replace(/[\\xD9-\\xDC]/g, \"U\")\n              .replace(/[\\xDD]/g, \"Y\")\n              .replace(/[\\xDE]/g, \"P\")\n              .replace(/[\\xE0-\\xE5]/g, \"a\")\n              .replace(/[\\xE6]/g, \"ae\")\n              .replace(/[\\xE7]/g, \"c\")\n              .replace(/[\\xE8-\\xEB]/g, \"e\")\n              .replace(/[\\xEC-\\xEF]/g, \"i\")\n              .replace(/[\\xF1]/g, \"n\")\n              .replace(/[\\xF2-\\xF6\\xF8]/g, \"o\")\n              .replace(/[\\xF9-\\xFC]/g, \"u\")\n              .replace(/[\\xFE]/g, \"p\")\n              .replace(/[\\xFD\\xFF]/g, \"y\");\n  }\n\n  return string;\n}\n\nconst removeNonWord = string => string.replace(/[^0-9a-zA-Z\\xC0-\\xFF \\-]/g, '');\n\nconst WHITE_SPACES = [\n    ' ', '\\n', '\\r', '\\t', '\\f', '\\v', '\\u00A0', '\\u1680', '\\u180E',\n    '\\u2000', '\\u2001', '\\u2002', '\\u2003', '\\u2004', '\\u2005', '\\u2006',\n    '\\u2007', '\\u2008', '\\u2009', '\\u200A', '\\u2028', '\\u2029', '\\u202F',\n    '\\u205F', '\\u3000'\n];\n\n/**\n* Remove chars from beginning of string.\n*/\nconst ltrim = (string, chars) => {\n  chars = chars || WHITE_SPACES;\n\n  var start = 0,\n      len = string.length,\n      charLen = chars.length,\n      found = true,\n      i, c;\n\n  while (found && start < len) {\n      found = false;\n      i = -1;\n      c = string.charAt(start);\n\n      while (++i < charLen) {\n          if (c === chars[i]) {\n              found = true;\n              start++;\n              break;\n          }\n      }\n  }\n\n  return (start >= len) ? '' : string.substr(start, len);\n}\n\n/**\n* Remove chars from end of string.\n*/\nconst rtrim = (string, chars) => {\n  chars = chars || WHITE_SPACES;\n\n  var end = string.length - 1,\n      charLen = chars.length,\n      found = true,\n      i, c;\n\n  while (found && end >= 0) {\n      found = false;\n      i = -1;\n      c = string.charAt(end);\n\n      while (++i < charLen) {\n          if (c === chars[i]) {\n              found = true;\n              end--;\n              break;\n          }\n      }\n  }\n\n  return (end >= 0) ? string.substring(0, end + 1) : '';\n}\n\n/**\n * Add space between camelCase text.\n */\nconst unCamelCase = string => {\n  string = string.replace(/([a-z\\xE0-\\xFF])([A-Z\\xC0\\xDF])/g, '$1 $2');\n  string = string.toLowerCase();\n  return string;\n}\n\n/**\n * Remove white-spaces from beginning and end of string.\n */\nexport const trim = (string, chars) => {\n  chars = chars || WHITE_SPACES;\n  return ltrim(rtrim(string, chars), chars);\n}\n\n/**\n * Convert to lower case, remove accents, remove non-word chars and\n * replace spaces with the specified delimeter.\n * Does not split camelCase text.\n */\nexport const slugify = (string, delimeter) => {\n  if (delimeter == null) {\n      delimeter = \"-\";\n  }\n\n  string = replaceAccents(string);\n  string = removeNonWord(string);\n  string = trim(string) //should come after removeNonWord\n          .replace(/ +/g, delimeter) //replace spaces with delimeter\n          .toLowerCase();\n  return string;\n}\n\n/**\n* Replaces spaces with hyphens, split camelCase text, remove non-word chars, remove accents and convert to lower case.\n*/\nexport const hyphenate = string => {\n  string = unCamelCase(string);\n  return slugify(string, \"-\");\n}\n\n//\n// merge\n//\n\n/**\n * @mixin Backed\n * @module utils\n * @export merge\n *\n * some-prop -> someProp\n *\n * @param {object} object The object to merge with\n * @param {object} source The object to merge\n * @return {object} merge result\n */\nexport const merge = (object = {}, source = {}) => {\n  // deep assign\n  for (const key of Object.keys(object)) {\n    if (source[key]) {\n      Object.assign(object[key], source[key]);\n    }\n  }\n  // assign the rest\n  for (const key of Object.keys(source)) {\n    if (!object[key]) {\n      object[key] = source[key];\n    }\n  }\n  return object;\n}\n\n//\n// loadScript\n//\n\n/**\n * @mixin Backed\n * @module utils\n * @export loadScript\n *\n * defer handles loading after the document is parsed, async loads while parsing\n *\n * @param {string} src link/path to the script to load\n * @param {string} method default: 'async',  options: `defer, async, ''`\n * @param {string} type default: undefined,  options: `module, utf-8, ...`\n * @return {object} merge result\n */\n export const loadScript = (src, method = 'async', type) => {\n   return new Promise((resolve, reject) => {\n     let script = document.createElement('script');\n     script.setAttribute(method, '');\n     if (type) script.setAttribute('type', type);\n     script.onload = result => {\n       resolve(result);\n     }\n     script.onerror = error => {\n       reject(error);\n     }\n     script.src = src;\n     document.body.appendChild(script);\n   });\n }\n\n /**\n  * @mixin utils\n  * @export loadModule\n  *\n  * defer handles loading after the document is parsed, async loads while parsing\n  *\n  * @param {string} src link/path to the module to load\n  * @param {string} method default: 'async',  options: `defer, async, ''`\n  * @return {promise}\n  */\n  export const loadModule = (src, method = 'async') => {\n    return loadScript(src, method, 'module');\n  }\n\n //\n // fireEvent\n //\n\n /**\n  * @mixin backed\n  * @module utils\n  * @export fireEvent\n  *\n  * @param {string} type Name of the event\n  * @param {HTMLElement} target context\n  * @param {string|boolean|number|object|array} detail\n  */\n export const fireEvent = (type='', detail=null, target=this) => {\n   target.dispatchEvent(new CustomEvent(type, {detail: detail}));\n };\n\n\n let sheduled = false;\n const afterRenderQue = [];\n const beforeRenderQue = [];\n\n const callMethod = array => {\n   const context = array[0];\n   const callback = array[1];\n   const args = array[2];\n   try {\n     callback.apply(context, args);\n   } catch(e) {\n     setTimeout(() => {\n       throw e;\n     })\n   }\n };\n\n const flushQue = que => {\n   while (que.length) {\n     callMethod(que.shift);\n   }\n };\n\n const runQue = que => {\n   for (let i=0, l=que.length; i < l; i++) {\n     callMethod(que.shift());\n   }\n   sheduled = false;\n }\n\n const shedule = () => {\n   sheduled = true;\n   requestAnimationFrame(() => {\n     flushQue(beforeRenderQue);\n     setTimeout(() => {\n       runQue(afterRenderQue);\n     });\n   });\n };\n\n export const RenderStatus = (() => {\n   window.RenderStatus = window.RenderStatus || {\n     afterRender: (context, callback, args) => {\n       if (!sheduled) {\n         shedule();\n       }\n       afterRenderQue.push([context, callback, args]);\n     },\n     beforeRender: (context, callback, args) => {\n       if (!sheduled) {\n         shedule();\n       }\n       beforeRenderQue.push([context, callback, args]);\n     }\n   }\n })();\n\n export const shouldRegister = name => {\n   return customElements.get(name) ? false : true;\n }\n\n export const define = klass => {\n   const name = hyphenate(klass.name);\n   return shouldRegister(name) ? customElements.define(name, klass) : '';\n }\n",
     "static": true,
     "longname": "D:/Workspace/basicelements/backed/src/utils.js",
     "access": null,
@@ -1075,7 +1075,7 @@
     "importPath": "backed/src/utils.js",
     "importStyle": "{loadScript}",
     "description": "",
-    "lineNumber": 211,
+    "lineNumber": 212,
     "unknown": [
       {
         "tagName": "@mixin",
@@ -1106,6 +1106,16 @@
         "optional": false,
         "name": "method",
         "description": "default: 'async',  options: `defer, async, ''`"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "string"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "type",
+        "description": "default: undefined,  options: `module, utf-8, ...`"
       }
     ],
     "return": {
@@ -1120,6 +1130,58 @@
   {
     "__docId__": 56,
     "kind": "function",
+    "name": "loadModule",
+    "memberof": "src/utils.js",
+    "generator": false,
+    "async": false,
+    "static": true,
+    "longname": "src/utils.js~loadModule",
+    "access": null,
+    "export": true,
+    "importPath": "backed/src/utils.js",
+    "importStyle": "{loadModule}",
+    "description": "",
+    "lineNumber": 238,
+    "unknown": [
+      {
+        "tagName": "@mixin",
+        "tagValue": "utils"
+      }
+    ],
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "string"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "src",
+        "description": "link/path to the module to load"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "string"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "method",
+        "description": "default: 'async',  options: `defer, async, ''`"
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "promise"
+      ],
+      "spread": false,
+      "description": ""
+    }
+  },
+  {
+    "__docId__": 57,
+    "kind": "function",
     "name": "fireEvent",
     "memberof": "src/utils.js",
     "generator": false,
@@ -1131,7 +1193,7 @@
     "importPath": "backed/src/utils.js",
     "importStyle": "{fireEvent}",
     "description": "",
-    "lineNumber": 239,
+    "lineNumber": 255,
     "unknown": [
       {
         "tagName": "@mixin",
@@ -1180,7 +1242,7 @@
     ]
   },
   {
-    "__docId__": 57,
+    "__docId__": 58,
     "kind": "variable",
     "name": "sheduled",
     "memberof": "src/utils.js",
@@ -1191,11 +1253,11 @@
     "importPath": "backed/src/utils.js",
     "importStyle": null,
     "description": null,
-    "lineNumber": 244,
+    "lineNumber": 260,
     "undocument": true
   },
   {
-    "__docId__": 58,
+    "__docId__": 59,
     "kind": "variable",
     "name": "afterRenderQue",
     "memberof": "src/utils.js",
@@ -1206,11 +1268,11 @@
     "importPath": "backed/src/utils.js",
     "importStyle": null,
     "description": null,
-    "lineNumber": 245,
+    "lineNumber": 261,
     "undocument": true
   },
   {
-    "__docId__": 59,
+    "__docId__": 60,
     "kind": "variable",
     "name": "beforeRenderQue",
     "memberof": "src/utils.js",
@@ -1221,11 +1283,11 @@
     "importPath": "backed/src/utils.js",
     "importStyle": null,
     "description": null,
-    "lineNumber": 246,
+    "lineNumber": 262,
     "undocument": true
   },
   {
-    "__docId__": 60,
+    "__docId__": 61,
     "kind": "function",
     "name": "callMethod",
     "memberof": "src/utils.js",
@@ -1238,11 +1300,11 @@
     "importPath": "backed/src/utils.js",
     "importStyle": null,
     "description": null,
-    "lineNumber": 248,
+    "lineNumber": 264,
     "undocument": true
   },
   {
-    "__docId__": 61,
+    "__docId__": 62,
     "kind": "function",
     "name": "flushQue",
     "memberof": "src/utils.js",
@@ -1255,11 +1317,11 @@
     "importPath": "backed/src/utils.js",
     "importStyle": null,
     "description": null,
-    "lineNumber": 261,
+    "lineNumber": 277,
     "undocument": true
   },
   {
-    "__docId__": 62,
+    "__docId__": 63,
     "kind": "function",
     "name": "runQue",
     "memberof": "src/utils.js",
@@ -1272,11 +1334,11 @@
     "importPath": "backed/src/utils.js",
     "importStyle": null,
     "description": null,
-    "lineNumber": 267,
+    "lineNumber": 283,
     "undocument": true
   },
   {
-    "__docId__": 63,
+    "__docId__": 64,
     "kind": "function",
     "name": "shedule",
     "memberof": "src/utils.js",
@@ -1289,11 +1351,11 @@
     "importPath": "backed/src/utils.js",
     "importStyle": null,
     "description": null,
-    "lineNumber": 274,
+    "lineNumber": 290,
     "undocument": true
   },
   {
-    "__docId__": 64,
+    "__docId__": 65,
     "kind": "variable",
     "name": "RenderStatus",
     "memberof": "src/utils.js",
@@ -1304,11 +1366,11 @@
     "importPath": "backed/src/utils.js",
     "importStyle": "{RenderStatus}",
     "description": null,
-    "lineNumber": 284,
+    "lineNumber": 300,
     "undocument": true
   },
   {
-    "__docId__": 65,
+    "__docId__": 66,
     "kind": "function",
     "name": "shouldRegister",
     "memberof": "src/utils.js",
@@ -1321,11 +1383,11 @@
     "importPath": "backed/src/utils.js",
     "importStyle": "{shouldRegister}",
     "description": null,
-    "lineNumber": 301,
+    "lineNumber": 317,
     "undocument": true
   },
   {
-    "__docId__": 66,
+    "__docId__": 67,
     "kind": "function",
     "name": "define",
     "memberof": "src/utils.js",
@@ -1338,11 +1400,11 @@
     "importPath": "backed/src/utils.js",
     "importStyle": "{define}",
     "description": null,
-    "lineNumber": 305,
+    "lineNumber": 321,
     "undocument": true
   },
   {
-    "__docId__": 67,
+    "__docId__": 68,
     "kind": "file",
     "name": "src/warnings.js",
     "content": "const _warnings = [];\r\n\r\nconst warnings = {\r\n  CESV0: 'Backed uses a ready method as lifeCycleCallback, please see the documentation for more info',\r\n  CESV1: 'Backed uses a ready method as lifeCycleCallback, things should work fine when CESV1 is supported, but CESV0 not, please see the documentation for more info'\r\n};\r\n\r\nconst warn = (name, warning) => {\r\n  if (!_warnings[warning]) {\r\n    console.warn(`${name}::${warnings[warning]}`);\r\n    _warnings.push(warning);\r\n  }\r\n}\r\n\r\nexport default {\r\n  warn: warn\r\n}\r\n",
@@ -1353,7 +1415,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 68,
+    "__docId__": 69,
     "kind": "variable",
     "name": "_warnings",
     "memberof": "src/warnings.js",
@@ -1368,7 +1430,7 @@
     "undocument": true
   },
   {
-    "__docId__": 69,
+    "__docId__": 70,
     "kind": "variable",
     "name": "warnings",
     "memberof": "src/warnings.js",
@@ -1383,7 +1445,7 @@
     "undocument": true
   },
   {
-    "__docId__": 70,
+    "__docId__": 71,
     "kind": "function",
     "name": "warn",
     "memberof": "src/warnings.js",
@@ -1409,7 +1471,7 @@
   },
   {
     "kind": "packageJSON",
-    "content": "{\r\n  \"name\": \"backed\",\r\n  \"version\": \"0.9.0\",\r\n  \"description\": \"Small web framework for quick app & component development\",\r\n  \"main\": \"backed.js\",\r\n  \"scripts\": {\r\n    \"prepublish\": \"esdoc && sh scripts/release.sh && sh scripts/gh-pages.sh\",\r\n    \"postpublish\": \"sh scripts/clean.sh\",\r\n    \"test\": \"echo \\\"Error: no test specified\\\" && exit 1\"\r\n  },\r\n  \"flat\": true,\r\n  \"repository\": {\r\n    \"type\": \"git\",\r\n    \"url\": \"git+https://github.com/vandeurenglenn/backed.git\"\r\n  },\r\n  \"author\": \"Glenn Vadeuren <vandeurenglenn@gmail.com>\",\r\n  \"license\": \"CC-BY-NC-ND-4.0\",\r\n  \"bugs\": {\r\n    \"url\": \"https://github.com/vandeurenglenn/backed/issues\"\r\n  },\r\n  \"homepage\": \"https://github.com/vandeurenglenn/backed#readme\",\r\n  \"devDependencies\": {\r\n    \"babel-preset-es2016\": \"^6.22.0\",\r\n    \"custom-app-layout\": \"^0.9.0-preview\",\r\n    \"custom-docs\": \"^0.9.0\",\r\n    \"esdoc\": \"^1.0.1\",\r\n    \"eslint\": \"^3.15.0\",\r\n    \"eslint-config-google\": \"^0.7.1\",\r\n    \"uglify-es\": \"^3.0.28\"\r\n  },\r\n  \"dependencies\": {\r\n    \"lit-html\": \"^0.5.0\"\r\n  },\r\n  \"backed\": {\r\n    \"bundles\": [\r\n      {\r\n        \"src\": \"./src/poly-loader.js\",\r\n        \"dest\": \"poly-loader.js\",\r\n        \"moduleName\": \"polyLoader\",\r\n        \"format\": \"es\",\r\n        \"plugins\": {\r\n          \"babel\": {\r\n            \"presets\": [\r\n              \"es2016\"\r\n            ]\r\n          }\r\n        }\r\n      },\r\n      {\r\n        \"src\": \"./src/mixins/lit-mixin.js\",\r\n        \"dest\": \"mixins/lit-mixin.js\",\r\n        \"moduleName\": \"LitMixin\",\r\n        \"format\": \"es\",\r\n        \"plugins\": {\r\n          \"babel\": {\r\n            \"presets\": [\r\n              \"es2016\"\r\n            ]\r\n          }\r\n        }\r\n      },\r\n      {\r\n        \"src\": \"./src/mixins/property-mixin.js\",\r\n        \"dest\": \"mixins/property-mixin.js\",\r\n        \"moduleName\": \"PropertyMixin\",\r\n        \"format\": \"es\",\r\n        \"plugins\": {\r\n          \"babel\": {\r\n            \"presets\": [\r\n              \"es2016\"\r\n            ]\r\n          }\r\n        }\r\n      },\r\n      {\r\n        \"src\": \"./src/backed.js\",\r\n        \"dest\": \"backed.js\",\r\n        \"moduleName\": \"Backed\",\r\n        \"format\": \"es\",\r\n        \"plugins\": {\r\n          \"babel\": {\r\n            \"presets\": [\r\n              \"es2016\"\r\n            ]\r\n          }\r\n        }\r\n      }\r\n    ]\r\n  },\r\n  \"esdoc\": {\r\n    \"source\": \"src/\",\r\n    \"destination\": \"docs/\"\r\n  },\r\n  \"resolutions\": {\r\n    \"babel-traverse\": \"6.26.0\",\r\n    \"babylon\": \"6.18.0\",\r\n    \"globals\": \"9.18.0\",\r\n    \"strip-ansi\": \"4.0.0\",\r\n    \"ansi-regex\": \"3.0.0\",\r\n    \"backed\": \"0.9.0-beta.4\",\r\n    \"cheerio\": \"0.22.0\",\r\n    \"minimist\": \"1.2.0\",\r\n    \"entities\": \"1.1.1\",\r\n    \"htmlparser2\": \"3.9.2\",\r\n    \"domutils\": \"1.6.2\",\r\n    \"domelementtype\": \"1.3.0\",\r\n    \"domhandler\": \"2.4.1\",\r\n    \"readable-stream\": \"2.3.3\",\r\n    \"isarray\": \"1.0.0\",\r\n    \"string_decoder\": \"1.0.3\",\r\n    \"acorn\": \"5.1.2\",\r\n    \"esprima\": \"4.0.0\",\r\n    \"ajv\": \"5.2.3\",\r\n    \"boom\": \"5.2.0\",\r\n    \"string-width\": \"2.1.1\",\r\n    \"is-fullwidth-code-point\": \"2.0.0\"\r\n  }\r\n}\r\n",
+    "content": "{\r\n  \"name\": \"backed\",\r\n  \"version\": \"0.9.1\",\r\n  \"description\": \"Small web framework for quick app & component development\",\r\n  \"main\": \"backed.js\",\r\n  \"scripts\": {\r\n    \"prepublish\": \"esdoc && sh scripts/release.sh && sh scripts/gh-pages.sh\",\r\n    \"postpublish\": \"sh scripts/clean.sh\",\r\n    \"test\": \"echo \\\"Error: no test specified\\\" && exit 1\"\r\n  },\r\n  \"flat\": true,\r\n  \"repository\": {\r\n    \"type\": \"git\",\r\n    \"url\": \"git+https://github.com/vandeurenglenn/backed.git\"\r\n  },\r\n  \"author\": \"Glenn Vadeuren <vandeurenglenn@gmail.com>\",\r\n  \"license\": \"CC-BY-NC-ND-4.0\",\r\n  \"bugs\": {\r\n    \"url\": \"https://github.com/vandeurenglenn/backed/issues\"\r\n  },\r\n  \"homepage\": \"https://github.com/vandeurenglenn/backed#readme\",\r\n  \"devDependencies\": {\r\n    \"babel-preset-es2016\": \"^6.22.0\",\r\n    \"custom-app-layout\": \"^0.9.0-preview\",\r\n    \"custom-docs\": \"^0.9.0\",\r\n    \"esdoc\": \"^1.0.1\",\r\n    \"eslint\": \"^3.15.0\",\r\n    \"eslint-config-google\": \"^0.7.1\",\r\n    \"uglify-es\": \"^3.0.28\"\r\n  },\r\n  \"dependencies\": {\r\n    \"lit-html\": \"^0.5.0\"\r\n  },\r\n  \"backed\": {\r\n    \"bundles\": [\r\n      {\r\n        \"src\": \"./src/poly-loader.js\",\r\n        \"dest\": \"poly-loader.js\",\r\n        \"moduleName\": \"polyLoader\",\r\n        \"format\": \"es\",\r\n        \"plugins\": {\r\n          \"babel\": {\r\n            \"presets\": [\r\n              \"es2016\"\r\n            ]\r\n          }\r\n        }\r\n      },\r\n      {\r\n        \"src\": \"./src/mixins/lit-mixin.js\",\r\n        \"dest\": \"mixins/lit-mixin.js\",\r\n        \"moduleName\": \"LitMixin\",\r\n        \"format\": \"es\",\r\n        \"plugins\": {\r\n          \"babel\": {\r\n            \"presets\": [\r\n              \"es2016\"\r\n            ]\r\n          }\r\n        }\r\n      },\r\n      {\r\n        \"src\": \"./src/mixins/property-mixin.js\",\r\n        \"dest\": \"mixins/property-mixin.js\",\r\n        \"moduleName\": \"PropertyMixin\",\r\n        \"format\": \"es\",\r\n        \"plugins\": {\r\n          \"babel\": {\r\n            \"presets\": [\r\n              \"es2016\"\r\n            ]\r\n          }\r\n        }\r\n      },\r\n      {\r\n        \"src\": \"./src/backed.js\",\r\n        \"dest\": \"backed.js\",\r\n        \"moduleName\": \"Backed\",\r\n        \"format\": \"es\",\r\n        \"plugins\": {\r\n          \"babel\": {\r\n            \"presets\": [\r\n              \"es2016\"\r\n            ]\r\n          }\r\n        }\r\n      }\r\n    ]\r\n  },\r\n  \"esdoc\": {\r\n    \"source\": \"src/\",\r\n    \"destination\": \"docs/\"\r\n  },\r\n  \"resolutions\": {\r\n    \"babel-traverse\": \"6.26.0\",\r\n    \"babylon\": \"6.18.0\",\r\n    \"globals\": \"9.18.0\",\r\n    \"strip-ansi\": \"4.0.0\",\r\n    \"ansi-regex\": \"3.0.0\",\r\n    \"backed\": \"0.9.0-beta.4\",\r\n    \"cheerio\": \"0.22.0\",\r\n    \"minimist\": \"1.2.0\",\r\n    \"entities\": \"1.1.1\",\r\n    \"htmlparser2\": \"3.9.2\",\r\n    \"domutils\": \"1.6.2\",\r\n    \"domelementtype\": \"1.3.0\",\r\n    \"domhandler\": \"2.4.1\",\r\n    \"readable-stream\": \"2.3.3\",\r\n    \"isarray\": \"1.0.0\",\r\n    \"string_decoder\": \"1.0.3\",\r\n    \"acorn\": \"5.1.2\",\r\n    \"esprima\": \"4.0.0\",\r\n    \"ajv\": \"5.2.3\",\r\n    \"boom\": \"5.2.0\",\r\n    \"string-width\": \"2.1.1\",\r\n    \"is-fullwidth-code-point\": \"2.0.0\"\r\n  }\r\n}\r\n",
     "longname": "D:\\Workspace\\basicelements\\backed\\package.json",
     "name": "package.json",
     "static": true,
