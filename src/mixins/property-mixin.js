@@ -37,7 +37,7 @@ export default base => {
           if (String(attribute.name).includes('on-')) {
             const fn = attribute.value;
             const name = attribute.name.replace('on-', '');
-            target.addEventListener(String(name), event => {
+            this.addEventListener(String(name), event => {
               target = event.path[0];
               while (!target.host) {
                 target = target.parentNode;
