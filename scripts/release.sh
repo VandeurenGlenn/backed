@@ -14,6 +14,7 @@ uglifyjs mixins/property-mixin.js --compress --mangle --keep-fnames --ecma 6 --o
 uglifyjs poly-loader.js --compress --mangle --keep-fnames --ecma 6 --output poly-loader.min.js
 
 git add package.json
+git add yarn.lock
 git add docs
 git commit -m ":trollface: Version: $PACKAGE_VERSION"
 
