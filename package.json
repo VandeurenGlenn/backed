@@ -1,6 +1,6 @@
 {
   "name": "backed",
-  "version": "0.9.5",
+  "version": "0.10.0-alpha",
   "description": "Small web framework for quick app & component development",
   "main": "backed.js",
   "scripts": {
@@ -63,6 +63,19 @@
         "src": "./src/mixins/property-mixin.js",
         "dest": "mixins/property-mixin.js",
         "moduleName": "PropertyMixin",
+        "format": "es",
+        "plugins": {
+          "babel": {
+            "presets": [
+              "es2016"
+            ]
+          }
+        }
+      },
+      {
+        "src": "./src/mixins/css-mixin.js",
+        "dest": "mixins/css-mixin.js",
+        "moduleName": "CSSMixin",
         "format": "es",
         "plugins": {
           "babel": {
