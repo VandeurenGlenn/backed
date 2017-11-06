@@ -17,7 +17,10 @@ export default base => {
     }
     connectedCallback() {
       if (super.connectedCallback) super.connectedCallback();
-      if (this.render) render(this.render(), this.shadowRoot);
+      if (this.render) {
+        render(this.render(), this.shadowRoot);
+        this.rendered = true;
+      };
     }
     _isValidRenderer(renderer) {
       if (!renderer) {
