@@ -18,6 +18,8 @@ uglifyjs poly-loader.js --compress --mangle --keep-fnames --ecma 6 --output poly
 git add package.json
 git add yarn.lock
 git add docs
+git add src/*
+
 git commit -m ":trollface: Version: $PACKAGE_VERSION"
 
 git tag $PACKAGE_VERSION
