@@ -1,7 +1,7 @@
 'use strict';
 import base from './base.js';
 // import renderStatus from './internals/render-status.js';
-import { html } from './../node_modules/lit-html/lit-html.js';
+import { html } from './../../lit-html/lit-html.js';
 import {shouldRegister, hyphenate} from './utils.js';
 
 const ____isWindow____ = () => {

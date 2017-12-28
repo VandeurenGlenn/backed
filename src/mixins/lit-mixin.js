@@ -1,4 +1,4 @@
-import { html, render } from './../../node_modules/lit-html/lit-html.js';
+import { html, render } from './../../../lit-html/lit-html.js';
 window.html = window.html || html;
 window.Backed = window.Backed || {};
 window.Backed.Renderer = window.Backed.Renderer || render;

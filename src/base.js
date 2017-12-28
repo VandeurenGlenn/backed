@@ -2,7 +2,7 @@
 
 import { loadScript, fireEvent, toJsProp, RenderStatus } from './utils.js';
 import PubSub from './internals/pub-sub.js';
-import { render } from './../node_modules/lit-html/lit-html.js'
+import { render } from './../../lit-html/lit-html.js'
 
 window.registeredElements = window.registeredElements || [];
 
