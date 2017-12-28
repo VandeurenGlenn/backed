@@ -2,6 +2,8 @@
 
 echo 'cleaning ...'
 
+node scripts/clean.js
+
 rm -rf .gh-pages-tmp
 rm -rf backed.js
 rm -rf backed.min.js

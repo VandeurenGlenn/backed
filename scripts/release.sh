@@ -8,6 +8,8 @@ PACKAGE_VERSION=$(cat package.json \
 
 echo $PACKAGE_VERSION
 
+node scripts/build.js
+
 uglifyjs backed.js --compress --mangle --keep-fnames --ecma 6 --output backed.min.js
 uglifyjs mixins/lit-mixin.js --compress --mangle --keep-fnames --ecma 6 --output mixins/lit-mixin.min.js
 uglifyjs mixins/property-mixin.js --compress --mangle --keep-fnames --ecma 6 --output mixins/property-mixin.min.js
