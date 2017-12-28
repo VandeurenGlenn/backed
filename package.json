@@ -1,6 +1,6 @@
 {
   "name": "backed",
-  "version": "0.10.0-alpha.2",
+  "version": "0.10.0-beta",
   "description": "Small web framework for quick app & component development",
   "main": "backed.js",
   "scripts": {
