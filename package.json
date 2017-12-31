@@ -97,6 +97,19 @@
             ]
           }
         }
+      },
+      {
+        "src": "./src/utils.js",
+        "dest": "utils.js",
+        "moduleName": "BackedUtils",
+        "format": "es",
+        "plugins": {
+          "babel": {
+            "presets": [
+              "es2016"
+            ]
+          }
+        }
       }
     ]
   },
