@@ -17,6 +17,9 @@
         color: var(--text-color);
         mixin(--css-column)`,
   'mixin(--css-flex)': `flex: 1;`,
+  'mixin(--css-flex-2)': `flex: 2;`,
+  'mixin(--css-flex-3)': `flex: 3;`,
+  'mixin(--css-flex-4)': `flex: 4;`,
   'mixin(--material-palette)': `--dark-primary-color: #00796B;
         --light-primary-color: #B2DFDB;
         --primary-color: #009688;
@@ -28,10 +31,18 @@
         --disabled-text-color: #BDBDBD;
         --primary-background-color: #f9ffff;
         --dialog-background-color: #FFFFFF;`,
-  'mixin(--css-hero)': `position: absolute;
-        top: 50%;
+  'mixin(--css-hero)': `display: flex;
+        max-width: 600px;
+        max-height: 340px;
+        height: 100%;
+        width: 100%;
+        box-shadow: 3px 2px 4px 2px rgba(0,0,0, 0.15),
+                    -2px 0px 4px 2px rgba(0,0,0, 0.15);
+        position: absolute;
         left: 50%;
+        top: 50%;
         transform: translate(-50%, -50%);
+        border-radius: 2px;
   `
  };
 
@@ -48,6 +59,15 @@
         mixin(--css-flex)
       }
    `,
+   'apply(--css-flex-2)': `.flex-2 {
+     mixin(--css-flex-2)
+   }`,
+   'apply(--css-flex-3)': `.flex-3 {
+     mixin(--css-flex-3)
+   }`,
+   'apply(--css-flex-4)': `.flex-4 {
+     mixin(--css-flex-4)
+   }`,
    'apply(--css-center)': `.center {
         align-items: center;
       }
