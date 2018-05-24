@@ -7,3 +7,4 @@ dist/**
 /mixins/*.min.js
 /mixins/*.js
 /mixins/*.js.map
+!rollup.config.js

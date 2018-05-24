@@ -252,7 +252,7 @@ export const merge = (object = {}, source = {}) => {
   * @param {HTMLElement} target context
   * @param {string|boolean|number|object|array} detail
   */
- export const fireEvent = (type='', detail=null, target=this) => {
+ export const fireEvent = (type='', detail=null, target=HTMLElement) => {
    target.dispatchEvent(new CustomEvent(type, {detail: detail}));
  };
 

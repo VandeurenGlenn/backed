@@ -10,7 +10,7 @@
 ## Installation
 
 ```sh
-$ bower install --save backed
+$ yarn add backed
 ```
 
 ```sh
@@ -18,6 +18,17 @@ $ npm install --save backed
 ```
 
 ## Usage
+### Importing
+#### ES modules
+Imports are found in the "src" folder
+```js
+import package from 'package/location/src/package.js';
+```
+#### iife
+Imports are found in the package root folder
+```html
+<script src="package/location/package.js"></script>
+```
 
 ### Basic usage
 ```js
@@ -28,88 +39,7 @@ Backed(class extends HTMLElement {
 });
 ```
 
-### Using observers
-
-```js
-Backed(class extends HTMLElement {
-  static get properties() {
-    return {
-      name: {
-        observer: 'change'
-      }
-    }
-  }
-  ready() {
-    // ready to go ...
-  }
-  change(change) {
-    console.log(change);
-  }
-});
-```
-
-### Using reflect
-
-```js
-Backed(class extends HTMLElement {
-  static get properties() {
-    return {
-      name: {
-        reflect: true
-      }
-    }
-  }
-  ready() {
-    // ready to go ...
-  }
-});
-```
-
-### Using render
-
-```js
-Backed(class extends HTMLElement {
-  static get properties() {
-    return {
-      name: {
-        render: true,
-        value: 'name should go here'
-      },      
-      lastname: {
-        render: true
-        value: 'lastname should go here'
-      }
-    }
-  }
-  render() {
-    html`
-      <style></style>
-      <h1>${this.name}</h1>
-      <h2>${this.lastname}</h2>
-    `
-  }
-});
-```
-#### or
-
-warning: watch out when using multiple renderers, when doing this the element will have the templateResult of the last render
-```js
-Backed(class extends HTMLElement {
-  static get properties() {
-    return {
-      name: {
-        render: 'renderName'
-      }
-    }
-  }
-  renderName() {
-    html`
-      <style></style>
-      <h1>${this.name}</h1>
-    `
-  }
-});
-```
+[examples](https://github.com/VandeurenGlenn/backed/examples.md)
 
 ## More info
 - [wiki](https://github.com/VandeurenGlenn/backed/wiki)
