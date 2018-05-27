@@ -7,6 +7,6 @@
  * @param {HTMLElement} target context
  * @param {string|boolean|number|object|array} detail
  */
-export default fireEvent = (type='', detail=null, target=HTMLElement) => {
+export default (type='', detail=null, target=HTMLElement) => {
   target.dispatchEvent(new CustomEvent(type, {detail: detail}));
 };

@@ -7,7 +7,7 @@ import trim from './trim.js';
  * replace spaces with the specified delimeter.
  * Does not split camelCase text.
  */
-export default slugify = (string, delimeter) => {
+export default (string, delimeter) => {
   if (delimeter == null) {
       delimeter = "-";
   }
@@ -18,4 +18,4 @@ export default slugify = (string, delimeter) => {
           .replace(/ +/g, delimeter) //replace spaces with delimeter
           .toLowerCase();
   return string;
-}
+};

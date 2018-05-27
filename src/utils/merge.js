@@ -9,7 +9,7 @@
  * @param {object} source The object to merge
  * @return {object} merge result
  */
-export default merge = (object = {}, source = {}) => {
+export default (object = {}, source = {}) => {
   // deep assign
   for (const key of Object.keys(object)) {
     if (source[key]) {

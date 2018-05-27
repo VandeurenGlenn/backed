@@ -1,3 +1,5 @@
- export default shouldRegister = name => {
-   return customElements.get(name) ? false : true;
- }
+const shouldRegister = name => {
+  return customElements.get(name) ? false : true;
+}
+
+export default shouldRegister;

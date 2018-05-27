@@ -2,7 +2,7 @@ import { WHITE_SPACES } from './constants.js';
 /**
 * Remove chars from beginning of string.
 */
-export default ltrim = (string, chars) => {
+export default (string, chars) => {
   chars = chars || WHITE_SPACES;
 
   let start = 0,

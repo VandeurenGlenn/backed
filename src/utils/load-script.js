@@ -10,7 +10,7 @@
  * @param {string} type default: undefined,  options: `module, utf-8, ...`
  * @return {object} merge result
  */
- export default loadScript = (src, method = 'async', type) => {
+ export default (src, method = 'async', type) => {
    return new Promise((resolve, reject) => {
      let script = document.createElement('script');
      script.setAttribute(method, '');

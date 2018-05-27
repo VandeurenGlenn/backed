@@ -38,7 +38,7 @@ const shedule = () => {
   });
 };
 
-export default RenderStatus = (() => {
+export default (() => {
   window.RenderStatus = window.RenderStatus || {
     afterRender: (context, callback, args) => {
       if (!sheduled) {

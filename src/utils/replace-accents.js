@@ -1,7 +1,7 @@
 /**
 * Replaces all accented chars with regular ones
 */
-export default replaceAccents = (string) => {
+export default (string) => {
   // verifies if the String has accents and replace them
   if (string.search(/[\xC0-\xFF]/g) > -1) {
       string = string

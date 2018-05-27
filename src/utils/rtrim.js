@@ -2,7 +2,7 @@ import { WHITE_SPACES } from './constants.js';
 /**
 * Remove chars from end of string.
 */
-export default rtrim = (string, chars) => {
+export default (string, chars) => {
   chars = chars || WHITE_SPACES;
 
   var end = string.length - 1,

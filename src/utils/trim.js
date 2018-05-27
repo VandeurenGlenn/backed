@@ -4,7 +4,7 @@ import rtrim from './rtrim.js';
 /**
  * Remove white-spaces from beginning and end of string.
  */
-export default trim = (string, chars) => {
+export default (string, chars) => {
   chars = chars || WHITE_SPACES;
   return ltrim(rtrim(string, chars), chars);
 }

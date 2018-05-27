@@ -9,6 +9,6 @@ import loadScript from './load-script.js';
  * @param {string} method default: 'async',  options: `defer, async, ''`
  * @return {promise}
  */
- export default loadModule = (src, method = 'async') => {
+ export default (src, method = 'async') => {
    return loadScript(src, method, 'module');
  }
