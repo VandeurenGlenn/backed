@@ -1,8 +1,10 @@
 'use strict';
 
-import { loadScript, fireEvent, toJsProp, RenderStatus } from './utils.js';
+import loadScript from './utils/load-script.js';
+import fireEvent from './utils/fire-event.js';
+import toJsProp from './utils/to-js-prop.js';
+import RenderStatus from './utils/render-status.js';
 import PubSub from './internals/pub-sub.js';
-import { render } from './../node_modules/lit-html/lit-html.js'
 
 window.registeredElements = window.registeredElements || [];
 
@@ -28,7 +30,7 @@ const handleProperties = (target, properties) => {
   }
 }
 
-const handleProperty = (obj, property, {observer, strict, global, reflect, render, value }) => {
+const handleProperty = (obj, property, {observer, strict, global, reflect, renderer, value }) => {
 
   if (Boolean(observer || global) && _needsObserverSetup(obj, property)) {
     // Ensure we don't do duplicate work
@@ -44,9 +46,9 @@ const handleProperty = (obj, property, {observer, strict, global, reflect, rende
       // values should be set as property, so we know if a value needs to be set on attribute, rerender template, etc ..
       PubSub.subscribe(`global.${property}`, obj[observer].bind(obj));
     }
-    setupObserver(obj, property, observer, {strict, global, reflect, renderer: render})
-  } else if (!Boolean(observer || global) && Boolean(reflect || render)) {
-    setupObserver(obj, property, observer, {strict, global, reflect, renderer: render})
+    setupObserver(obj, property, observer, {strict, global, reflect, renderer: renderer})
+  } else if (!Boolean(observer || global) && Boolean(reflect || renderer)) {
+    setupObserver(obj, property, observer, {strict, global, reflect, renderer: renderer})
   }
 }
 
@@ -116,12 +118,10 @@ const setupObserver = (obj, property, fn, {strict, global, reflect, renderer}) =
         else this.removeAttribute(property);
       }
       if (renderer) {
-        if (typeof renderer === 'boolean') {
-          render(this.render(), this.shadowRoot);
-        } else {
           // adds support for multiple renderers
-          render(this[renderer](), this.shadowRoot);
-        }
+          const object = {}
+          object[property] = value;
+          this.render(object, this[renderer]);
       }
       if (global) {
         data.instance = this;

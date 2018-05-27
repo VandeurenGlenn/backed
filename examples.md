@@ -23,6 +23,30 @@ class define(MyElement) extends PropertyMixin(HTMLElement) {
     this.render(); // render each time name changes
   }
 }
+// or render the name template only wip
+class define(MyElement) extends PropertyMixin(HTMLElement) {
+  static get properties() {
+    return merge(super.properties, {
+      name: {
+        value: 'archer',
+        reflect: true, // updates attribute & listens for changes
+        observer: 'nameObserver'
+      }, 
+      announce: {
+        value: 'greatest spy off the world',
+        renderer: 'announceTemplate'
+      }
+    });
+  }
+  
+  constructor() {
+    super();
+  }
+  
+  get announceTemplate() {
+    return html`${'announce'}`;
+  }
+}
 ```
 
 ### combining with custom-renderer-mixin

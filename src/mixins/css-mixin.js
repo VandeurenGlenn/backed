@@ -1,5 +1,5 @@
 /**
- * @module LitMixin
+ * @module CSSMixin
  * @mixin Backed
  * @param {class} base class to extend from
  */

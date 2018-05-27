@@ -2,7 +2,6 @@ window.Backed = window.Backed || {};
 // binding does it's magic using the propertyStore ...
 window.Backed.PropertyStore = window.Backed.PropertyStore || new Map();
 
-const render = window.Backed.Renderer;
 // TODO: Create & add global observer
 export default base => {
   return class PropertyMixin extends base {
@@ -19,11 +18,6 @@ export default base => {
       if (this.properties) {
         for (const entry of Object.entries(this.properties)) {
           const { observer, reflect, renderer } = entry[1];
-          if (observer || reflect || renderer) {
-            if (renderer && !render) {
-              console.warn('Renderer undefined');
-            }
-          }
           // allways define property even when renderer is not found.
           this.defineProperty(entry[0], entry[1]);
         }
@@ -76,7 +70,9 @@ export default base => {
           }
 
           if (renderer) {
-            if (renderer in this) render(this[renderer](), this.shadowRoot);
+            const obj = {};
+            obj[property] = value;
+            if (renderer in this) this.render(obj, this[renderer]);
             else console.warn(`renderer::${renderer} undefined`);
           }
 
