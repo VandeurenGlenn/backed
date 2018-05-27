@@ -859,7 +859,7 @@
         "leadingComments": [
           {
             "type": "CommentBlock",
-            "value": "*\r\n * @module LitMixin\r\n * @mixin Backed\r\n * @param {class} base class to extend from\r\n ",
+            "value": "*\r\n * @module CSSMixin\r\n * @mixin Backed\r\n * @param {class} base class to extend from\r\n ",
             "start": 0,
             "end": 92,
             "loc": {
@@ -7032,7 +7032,7 @@
   "comments": [
     {
       "type": "CommentBlock",
-      "value": "*\r\n * @module LitMixin\r\n * @mixin Backed\r\n * @param {class} base class to extend from\r\n ",
+      "value": "*\r\n * @module CSSMixin\r\n * @mixin Backed\r\n * @param {class} base class to extend from\r\n ",
       "start": 0,
       "end": 92,
       "loc": {
@@ -7226,7 +7226,7 @@
   "tokens": [
     {
       "type": "CommentBlock",
-      "value": "*\r\n * @module LitMixin\r\n * @mixin Backed\r\n * @param {class} base class to extend from\r\n ",
+      "value": "*\r\n * @module CSSMixin\r\n * @mixin Backed\r\n * @param {class} base class to extend from\r\n ",
       "start": 0,
       "end": 92,
       "loc": {
