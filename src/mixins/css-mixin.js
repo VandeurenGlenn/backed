@@ -144,25 +144,23 @@
 export default base => {
   return class CSSMixin extends base {
 
-    get style() {
+    get __style() {
       return this.shadowRoot.querySelector('style');
     }
     constructor() {
       super();
-      // this._transformClass = this._transformClass.bind(this)
     }
     connectedCallback() {
       // TODO: test
-      console.warn('test!!');
       if (super.connectedCallback) super.connectedCallback();
-      // TODO: Implement better way to check if LitMixin is used
-      if (this.render) this.hasLitMixin = true;
-      else if(this.template) console.log('element');
+      // TODO: Implement better way to check if a renderer is used
+      if (this.render) this.hasRenderer = true;
+      else if(this.template) console.log(`Render method undefined ${this.localname}`);
 
       this._init()
     }
     _init() {
-      if (this.hasLitMixin) {
+      if (this.hasRenderer) {
         if (!this.rendered) {
           return requestAnimationFrame(() => {
               this._init()
@@ -173,9 +171,9 @@ export default base => {
       // const matches = style.innerHTML.match(/apply((.*))/g);
       styles.forEach(style => {
         this._applyClasses(style.innerHTML).then(innerHTML => {
-          if (innerHTML) this.style.innerHTML = innerHTML;
+          if (innerHTML) this.__style.innerHTML = innerHTML;
           this._applyMixins(style.innerHTML).then(innerHTML => {
-            if (innerHTML) this.style.innerHTML = innerHTML;
+            if (innerHTML) this.__style.innerHTML = innerHTML;
           })
         }).catch(error => {
           console.error(error);
@@ -186,6 +184,7 @@ export default base => {
 
     _applyMixins(string) {
       const mixinInMixin = string => {
+        if (!string) return console.warn(`Nothing found for ${string}`);
         const matches = string.match(/mixin((.*))/g);
         if (matches) {
           for (const match of matches) {
@@ -199,7 +198,6 @@ export default base => {
         const matches = string.match(/mixin((.*))/g);
         if (matches) for (const match of matches) {
           const mixin = mixinInMixin(mixins[match]);
-          console.log(mixin);
           string = string.replace(match, mixin);
           // return [
           //   match, mixins[match]
